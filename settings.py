@@ -1,0 +1,8 @@
+HOST='localhost'
+PORT=3000
+DEBUG=True
+SQLALCHEMY_DATABASE_URI='sqlite:///osintnews.db'
+SQLALCHEMY_TRACK_MODIFICATIONS=False
+SECRET_KEY='kietdeptrai'
+WTF_CSRF_ENABLED=True
+
