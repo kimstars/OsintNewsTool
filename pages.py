@@ -47,7 +47,15 @@ def admin_chart():
     current_app.db.session.add(Category("Thoi su",time))
     current_app.db.session.commit()
     
+   
+    return render_template('admin/chart.html')
+
+@website.route('/admin/test', methods=['GET', 'POST'])
+def test():
+    
+    time = datetime.datetime.now()
     first_data = Category.query.first()
     
-    print(first_data)
-    return render_template('admin/chart.html')
+    print(first_data.name)
+    
+    return first_data.name
