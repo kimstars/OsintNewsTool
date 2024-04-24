@@ -21,6 +21,7 @@ api = Api(website)
 
 
 
+
 def getNavBar():
     categories = Category.query.all()
     print(categories)  
@@ -32,5 +33,21 @@ def getNavBar():
 
 @website.route('/', methods=['GET', 'POST'])
 def home():
-    return render_template('mainpages/home.html', appName="test" )
+    return render_template('index.html')
 
+@website.route('/admin/', methods=['GET', 'POST'])
+def admin_home():
+    return render_template('admin/index.html')
+
+
+@website.route('/admin/chart', methods=['GET', 'POST'])
+def admin_chart():
+    
+    time = datetime.datetime.now()
+    current_app.db.session.add(Category("Thoi su",time))
+    current_app.db.session.commit()
+    
+    first_data = Category.query.first()
+    
+    print(first_data)
+    return render_template('admin/chart.html')

@@ -10,7 +10,6 @@ import os.path as op
 
 
 
-
 def create_app():
     app = Flask(__name__)
     app.config.from_object('settings')
@@ -18,9 +17,6 @@ def create_app():
     app.secret_key = app.config.get('secret_key', 'secret')
     app.db = SQLAlchemy(app)
     path = op.join(op.dirname(__file__), 'static')
-    
-    
-  
     return app
 
 
