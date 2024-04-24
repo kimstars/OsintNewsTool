@@ -50,6 +50,35 @@ def admin_chart():
    
     return render_template('admin/chart.html')
 
+
+def InsertArticle(data):
+    data = {
+        "title" : "",
+        "url" : "",
+        "image_url" : "",
+        "author" : "",
+        "content" : "",
+        "create_at" : "",
+        "sentiment" : "",
+        "is_fake" : "",
+    }
+    new_article = Article(data['title'], 
+                        data['url'],
+                        data['image_url'],
+                        data['author'],
+                        data['content'],
+                        data['create_at'],
+                        data['sentiment'],
+                        data['is_fake'],
+
+                        )
+    
+    current_app.db.session.add()
+    current_app.db.session.commit()
+    
+    
+    
+
 @website.route('/admin/test', methods=['GET', 'POST'])
 def test():
     

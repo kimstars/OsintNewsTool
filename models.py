@@ -8,7 +8,6 @@ class Article(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(255), nullable=False)
-    category_id = Column(Integer, ForeignKey('categories.id'), nullable=False)
     url = Column(String(255))
     image_url = Column(String(255))
     author = Column(String(100), nullable=False)
@@ -21,9 +20,8 @@ class Article(Base):
     events = relationship('Event', secondary='article_event', back_populates='articles')
     keywords = relationship('Keyword', secondary='article_keyword', back_populates='articles')
 
-    def __init__(self, title, category_id, url, image_url, author, content, created_at, sentiment=None, is_fake=False):
+    def __init__(self, title, url, image_url, author, content, created_at, sentiment=None, is_fake=False):
         self.title = title
-        self.category_id = category_id
         self.url = url
         self.image_url = image_url
         self.author = author
