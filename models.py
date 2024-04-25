@@ -79,9 +79,13 @@ class Keyword(Base):
 
     articles = relationship('Article', secondary='article_keyword', back_populates='keywords')
 
-    def __init__(self, name, created_at):
+    def __init__(self, name):
+        time = datetime.datetime.now()
         self.name = name
-        self.created_at = created_at
+        
+        self.created_at = time
+       
+            
 
 
 article_keyword_association = Table(

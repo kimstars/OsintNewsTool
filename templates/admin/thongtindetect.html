@@ -8,7 +8,7 @@
         <h1 class="mt-4">Phân loại tin tức</h1>
         <ol class="breadcrumb mb-4">
             <li class="breadcrumb-item"><a href="/User/Index">Dashboard</a></li>
-            <li class="breadcrumb-item active">News Classification</li>
+            <li class="breadcrumb-item active">Phân loại tin tức</li>
         </ol>
         
         <form action="/admin/detectnews" method="post">
@@ -31,11 +31,11 @@
             <h3>Kết quả:</h3>
             <div class="card">
                 <div class="card-body" id="responseData">
+                    <h4 id="prelabel">* Phân loại:</h4>{{data['predicted_label']}}
                     <h4>* Tiêu đề:</h4>{{data['title']}}
                     <h4>* URL:</h4>{{data['url']}}
                     <h4>* Keywords:</h4>{{data['keywords']}}
                     <h4>* Nội dung:</h4>{{data['content']}}
-                    <h4>* Phân loại:</h4>{{data['sensitiment']}}
 
                 </div>
             </div>
@@ -45,7 +45,7 @@
 </main>
 
 <script>
-    var responseData = @Html.Raw(ViewBag.ResponseData);
+    var responseData = {{data|tojson}};
     if (responseData && responseData["predicted_label"] == "Danger news") {
         document.getElementById('responseData').classList.add('bg-danger');
     }else{

@@ -2,8 +2,6 @@ from flask import Blueprint, render_template, current_app, url_for, request, red
 from passlib.apps import custom_app_context as pwd_content
 from models import *
 from flask_restful import Api
-from flask_admin.contrib.sqla import ModelView
-from flask_admin.contrib.fileadmin import FileAdmin
 
 from model_detectfakenews import detect_fakenews
 
@@ -64,9 +62,24 @@ def summerize():
 def detectnews():
     data = {}
     
-    if request.method == 'POST' and form.validate_on_submit():
+    if request.method == 'POST':
         form = request.form
         url = form.get("url")
         data = detect_fakenews(url)
-
+        print(data)
     return render_template('admin/thongtindetect.html', data=data )
+
+
+
+@admin_web.route('/admin/add_keyword/<article_id>/<keyword_name>', methods=['GET'])
+def add_keyword_to_article(article_id, keyword_name):
+    article = Article.query.get(article_id)
+    keyword = Keyword.query.filter_by(name=keyword_name).first()
+    if not keyword:
+        keyword = Keyword(name=keyword_name)
+        current_app.db.session.add(keyword)
+    article.keywords.append(keyword)
+    current_app.db.session.commit()
+    return 'Keyword added to article successfully'
+
+    

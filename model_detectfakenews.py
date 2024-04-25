@@ -22,10 +22,10 @@ def detect_fakenews(url):
     MODEL_PATH = r".\model_detect\naive_bayes.pkl"
     model = pickle.load(open(MODEL_PATH, 'rb'))
 
-    print(url)
+    
     # Extract text content from URL
     text = extract_text_from_url(url)
-    print(text)
+    
     if  text:
         preprocessed_text = preprocess_text(text['content'])
         # Predict label using the model
@@ -33,5 +33,7 @@ def detect_fakenews(url):
         if predicted_label == 1:
             result = 'Safe news'
         else : result  = 'Danger news'
-
-        return {'url': url,'content':text, 'predicted_label': result}
+        
+        text['predicted_label'] = result
+        
+        return text
