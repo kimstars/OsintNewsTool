@@ -9,23 +9,27 @@ class Article(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     title = Column(String(255), nullable=False)
     url = Column(String(255))
-    image_url = Column(String(255))
-    author = Column(String(100), nullable=False)
+    image_url = Column(String(255),nullable=True )
+    author = Column(String(100), nullable=True)
+    category_id = Column(Integer, ForeignKey('categories.id'), nullable=True)
     content = Column(Text, nullable=False)
+    summerize = Column(Text, nullable=True)
     created_at = Column(DateTime, nullable=False)
-    sentiment = Column(String(50))
+    sentiment = Column(String(50), nullable=True)
     is_fake = Column(Boolean, default=False)
 
     category = relationship('Category', backref='articles')
     events = relationship('Event', secondary='article_event', back_populates='articles')
     keywords = relationship('Keyword', secondary='article_keyword', back_populates='articles')
 
-    def __init__(self, title, url, image_url, author, content, created_at, sentiment=None, is_fake=False):
+    def __init__(self, title, url, image_url, author,category_id, content,summerize, created_at, sentiment=None, is_fake=False):
         self.title = title
         self.url = url
         self.image_url = image_url
         self.author = author
+        self.category_id = category_id
         self.content = content
+        self.summerize = summerize
         self.created_at = created_at
         self.sentiment = sentiment
         self.is_fake = is_fake
