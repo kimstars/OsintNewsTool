@@ -28,26 +28,12 @@ def getNavBar():
 
 
 
-
-
 @website.route('/', methods=['GET', 'POST'])
 def home():
     return render_template('index.html')
 
-@website.route('/admin/', methods=['GET', 'POST'])
-def admin_home():
-    return render_template('admin/index.html')
 
 
-@website.route('/admin/chart', methods=['GET', 'POST'])
-def admin_chart():
-    
-    time = datetime.datetime.now()
-    current_app.db.session.add(Category("Thoi su",time))
-    current_app.db.session.commit()
-    
-   
-    return render_template('admin/chart.html')
 
 
 def InsertArticle(data):
@@ -120,9 +106,3 @@ def test():
     return str(data)
     
     
-@website.route('/admin/managernews', methods=['GET', 'POST'])
-def view():
-    
-    query = Article.query.all()
-
-    return render_template('admin/news_manager.html',listNews=query)
