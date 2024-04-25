@@ -1,0 +1,75 @@
+{% extends "/admin/layout.html" %}
+{% block title %} Dashboard {% endblock %}
+{% block body %}
+<style>
+    .red-row {
+      background-color: #FF0000; /* Màu đỏ cho hàng đầu */
+    }
+    .green-row {
+      background-color: #00FF00; /* Màu xanh lá cho các hàng còn lại */
+    }
+</style>
+
+<main>
+    <div class="container-fluid px-4">
+        <h1 class="mt-4">Table</h1>
+        <ol class="breadcrumb mb-4">
+            <li class="breadcrumb-item"><a href="index.html">Dashboard</a></li>
+            <li class="breadcrumb-item active">Table</li>
+        </ol>
+        <div class="card mb-4">
+            <div class="card-body">
+                Dữ liệu các bài báo</a>
+                .
+            </div>
+        </div>
+        <div class="card mb-4">
+            <div class="card-header">
+                <i class="fas fa-table me-1"></i>
+                News
+            </div>
+            <div class="card-body">
+                <table id="datatablesSimple">
+                    <thead>
+                        <tr>
+                        <th scope="col">#</th>
+                        <th scope="col">Tiêu đề</th>
+                        <th scope="col">URL</th>
+                        <th scope="col">Tác giả</th>
+                        <th scope="col">Nội dung</th>
+                        <th scope="col">Tóm tắt</th>
+                        <th scope="col">Thời gian</th>
+                        <th scope="col">Là FakeNews?</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in listNews %}
+                            <tr>
+                                <td>{{item.id}}</td>
+                                <td>{{item.title}}</td>
+                                <td>{{item.url}}</td>
+                                <td>{{item.author}}</td>
+                                <td>{{item.content[:100]}} ...</td>
+                                <td>{{item.summerize}}</td>
+                                <td>{{item.created_at}}</td>
+                                <td>{{item.is_fake}}</td>
+                               
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+   
+    </div>
+</main>  
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+
+
+<script src="{{url_for('static',filename='/Admin/js/scripts.js')}}"></script>
+<script src="{{url_for('static',filename='/Admin/js/datatables-simple-demo.js')}}"></script>
+
+
+{% endblock %}

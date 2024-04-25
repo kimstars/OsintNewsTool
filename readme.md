@@ -12,4 +12,4 @@ Tạo môi trường
 
 Chạy project
 
-`python server.py`
+`python run.py`
