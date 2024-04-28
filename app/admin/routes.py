@@ -3,6 +3,7 @@ from app.admin import blueprint
 from app.base.models import *
 from app.admin.model_detectfakenews import detect_fakenews
 from app import db
+from .handle import *
 
 @blueprint.route('/admin/', methods=['GET', 'POST'])
 def admin_home():
@@ -40,11 +41,17 @@ def crawler():
 
     return render_template('admin/news_manager.html',   )
 
-
+from .tomtatvanban import Summerizer
 @blueprint.route('/admin/summerize', methods=['GET', 'POST'])
 def summerize():
-    
-    return render_template('admin/news_manager.html',  )
+    data = content= ""
+    if request.method == 'POST':
+        form = request.form
+        content = form.get("content")
+        numsentence = form.get("numsentence")
+        data = Summerizer(content,int(numsentence))
+        
+    return render_template('admin/thongtintomtat.html', pre_data=content, data = data )
 
 
 
@@ -60,15 +67,23 @@ def detectnews():
     return render_template('admin/thongtindetect.html', data=data )
 
 
+@blueprint.route('/admin/getInfoURL', methods=['GET', 'POST'])
+def getInfoURL():
+    data = {}
+    url = ""
+    if request.method == 'POST':
+        form = request.form
+        url = form.get("url")
+        data = search_bm25(url)
+        print(data)
+    return render_template('admin/trangtimkiem.html'
+                        #    , soketqua=data['soketqua'] ,data=data['listdata']
+                           , keyword=url,
+                           scores = data
+                           )
+    
 
-@blueprint.route('/admin/add_keyword/<article_id>/<keyword_name>', methods=['GET'])
-def add_keyword_to_article(article_id, keyword_name):
-    article = Article.query.get(article_id)
-    keyword = Keyword.query.filter_by(name=keyword_name).first()
-    if not keyword:
-        keyword = Keyword(name=keyword_name)
-        db.session.add(keyword)
-    article.keywords.append(keyword)
-    db.session.commit()
-    return 'Keyword added to article successfully'
+
+# @blueprint.route('/admin/add_keyword/<article_id>/<keyword_name>', methods=['GET'])
+
 

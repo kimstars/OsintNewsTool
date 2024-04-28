@@ -3,6 +3,7 @@ from sqlalchemy.orm import relationship
 from sqlalchemy import Boolean, DateTime, Column, Integer, String, ForeignKey, Text, Table
 import datetime
 
+
 class Article(db.Model):
     __tablename__ = 'articles'
 
@@ -33,6 +34,10 @@ class Article(db.Model):
         self.created_at = created_at
         self.sentiment = sentiment
         self.is_fake = is_fake
+
+# https://github.com/radupotop/fts-api/blob/master/model.py
+
+
 
 class Category(db.Model):
     __tablename__ = 'categories'

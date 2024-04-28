@@ -17,30 +17,7 @@ def home():
 
 
 
-def InsertArticle(data):
-    try:
-        temp = Article.query.filter_by(url=data['url']).first()
-        if (temp):
-            print("Da ton tai")
-            return
-        else:
-            new_article = Article(data['title'], 
-                        data['url'],
-                        data['image_url'],
-                        data['author'],
-                        data['category_id'],
-                        data['content'],
-                        data['summerize'],
-                        data['create_at'],
-                        data['sentiment'],
-                        data['is_fake'],
-                        )
-    
-            current_app.db.session.add(new_article)
-            current_app.db.session.commit()
-    except Exception as e:
-        print("Da ton tai 1")
-        return
+
     
     
    
@@ -81,7 +58,7 @@ def test():
             "sentiment" : "",
             "is_fake" : isfake
         }
-        InsertArticle(data)
+        # InsertArticle(data)
         print(data)
         dbdata.append(data)
         

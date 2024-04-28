@@ -1,6 +1,6 @@
 import pickle
 from .model_detect.cleanData import text_preprocess
-from .model_detect.crawlData import crawl
+from .model_detect.crawlData import start_crawl
 from flask import Flask, request, jsonify
 
 import os
@@ -14,7 +14,7 @@ def preprocess_text(text):
 
 def extract_text_from_url(url):
     try:
-        return crawl(url)
+        return start_crawl(url)
     except Exception as e:
         return str(e)
     
@@ -26,7 +26,7 @@ def detect_fakenews(url):
 
     # Extract text content from URL
     text = extract_text_from_url(url)
-    
+    print("[debug]  ", text)
     if  text:
         preprocessed_text = preprocess_text(text['content'])
         # Predict label using the model
