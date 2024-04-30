@@ -3,7 +3,7 @@ import json
 import validators
 from newspaper import Article
 from bs4 import BeautifulSoup
-
+from .todate import *
 
 def is_url(url):
     return validators.url(url)
@@ -78,7 +78,7 @@ def crawler_viettan(url):
                 'title': title,
                 'keywords': "",
                 'author': author,
-                'published_date': art_time,
+                'published_date': todatetime(art_time, 1),
                 'top_img': image,
                 'content': content
             }
@@ -87,7 +87,7 @@ def crawler_viettan(url):
 
 
 
-
+from ..handle import InsertArticle, add_keyword_to_article
 
 def start_crawl(url):
     domain = getDomain(url)
@@ -101,35 +101,62 @@ def start_crawl(url):
 
         return result
     
+    
+    result = {}
     if("viettan.org" in domain):
-        return crawler_viettan(url)
-    
+        print("detect viettan ", url)
+        result =  crawler_viettan(url)
+    else:
+        while(1):
+            try:
+                article = Article(url)
+                article.download()
+                article.parse()
+                if(article):
+                    break
+            except:
+                pass
+        
+        content = article.text
+        
+        if(content == ""):
+            content = re.sub('\\n+', '</p><p>', '<p>' + clean_json(content) + '</p>')
 
-    while(1):
-        try:
-            article = Article(url)
-            article.download()
-            article.parse()
-            if(article):
-                break
-        except:
-            pass
+        result = {
+                    'url': url,
+                    'error': '',
+                    'success': True,
+                    'title': article.title,
+                    'keywords': ', '.join(article.keywords if article.keywords else (
+                        article.meta_keywords if article.meta_keywords else article.meta_data.get('keywords', []))),
+                    'published_date': article.publish_date if article.publish_date else article.meta_data.get('pubdate', ''),
+                    'top_img': article.top_image,
+                    'content': content
+                }
     
-    content = article.text
+    # them bai bao moi vao csdl
+    print("kiet checkkk=====================================>",str(result['published_date']))
+    # data = {
+    #         "title" : result["title"],
+    #         "url" : result["url"],
+    #         "image_url" : result["top_img"],
+    #         "author" : "",
+    #         "category_id": 1,
+    #         "content" : result["content"],
+    #         "summerize" : "",
+    #         "create_at" : result['published_date'],
+    #         "sentiment" : "",
+    #         "is_fake" : ""
+    #     }
+    # item_id = InsertArticle(data)
     
-    if(content == ""):
-        content = re.sub('\\n+', '</p><p>', '<p>' + clean_json(content) + '</p>')
-
-    result = {
-                'url': url,
-                'error': '',
-                'success': True,
-                'title': article.title,
-                'keywords': ', '.join(article.keywords if article.keywords else (
-                    article.meta_keywords if article.meta_keywords else article.meta_data.get('keywords', []))),
-                'published_date': article.publish_date if article.publish_date else article.meta_data.get('pubdate', ''),
-                'top_img': article.top_image,
-                'content': content
-            }
-     
+    # # them keyword
+    # for key in result['keywords']:
+    #     temp = key.lower().strip()
+    #     ret = add_keyword_to_article(item_id, temp)
+    #     print(f"{temp} => {ret}")
+    
     return result
+
+    
+    

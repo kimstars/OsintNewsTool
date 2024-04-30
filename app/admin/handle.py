@@ -2,9 +2,6 @@
 
 from app.base.models import *
 from app import db
-from flask import Flask, request, jsonify
-from rank_bm25 import BM25Okapi
-from .model_detect.crawlData import start_crawl
 
 def get_info_url(keyword):
     
@@ -95,26 +92,25 @@ def InsertArticle(data):
 
         db.session.add(new_article)
         db.session.commit()
+        
+        return new_article.id
+        
 
 
 def add_keyword_to_article(article_id, keyword_name):
-    article = Article.query.get(article_id)
-    keyword = Keyword.query.filter_by(name=keyword_name).first()
-    if not keyword:
-        keyword = Keyword(name=keyword_name)
-        db.session.add(keyword)
-    article.keywords.append(keyword)
-    db.session.commit()
-    return 'Keyword added to article successfully'
+    try:
+        article = Article.query.get(article_id)
+        keyword = Keyword.query.filter_by(name=keyword_name).first()
+        if not keyword:
+            keyword = Keyword(name=keyword_name)
+            db.session.add(keyword)
+        article.keywords.append(keyword)
+        db.session.commit()
+        return True
+    except Exception as e:
+        print("[Add keyword] error =>", e)
+        return False
 
 
-# kiem tra url ton tai trong DB chưa, nếu chưa thì cào dữ liệu
-def check_and_crawl(url):
-    data = {}
-    if(is_not_exist_article(url)):
-        temp = start_crawl(url)
-        # xử lý thêm vào bảng Article và bảng Keyword
-        data["title"] = temp["title"]
-        data["title"] = temp["title"]
-        data["title"] = temp["title"]
+
 
