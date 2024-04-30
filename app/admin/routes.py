@@ -8,8 +8,25 @@ from app.admin.model_detect.crawlData import start_crawl
 from datetime import datetime 
 @blueprint.route('/admin/', methods=['GET', 'POST'])
 def admin_home():
-    return render_template('admin/index.html')
-
+    sum_articles = Article.query.count()
+    sum_categories = Category.query.count()
+    categories = Category.query.distinct(Category.name).all()
+    categories_name = [category.name for category in categories]
+    # print(categories.name)
+    # print(cat.name for cat in categories)
+    category_counts = [Article.query.filter_by(category_id=category.id).count() for category in categories]
+    print(category_counts)
+    print(categories_name)
+    fakeCounts=[]
+    realCounts=[]
+    for category in categories:
+        fakeCount= Article.query.filter_by(category_id=category.id, is_fake=1).count()
+        realCount = Article.query.filter_by(category_id=category.id, is_fake=0).count()
+        fakeCounts.append(fakeCount)
+        realCounts.append(realCount)
+    print(fakeCounts,realCounts)
+    return render_template('admin/index.html', sum_a=sum_articles, sum_c = sum_categories, categories=categories_name, category_data=category_counts, fakeCounts=fakeCounts, realCounts=realCounts)
+    
 
 @blueprint.route('/admin/chart', methods=['GET', 'POST'])
 def admin_chart():

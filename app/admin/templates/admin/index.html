@@ -1,7 +1,7 @@
 {% extends "/admin/layout.html" %}
 {% block title %} Dashboard {% endblock %}
 {% block body %}
-
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <main>
                     <div class="container-fluid px-4">
                         <h1 class="mt-4">Dashboard</h1>
@@ -13,7 +13,7 @@
                                 <div id="onlineUsersCountCard" class="card bg-success text-white mb-4">
                                     <div class="card-body">
                                         <i class="fas fa-users"></i>
-                                        Online Users: <span id="onlineUsersCount"></span>
+                                        Total Articles: <span id="onlineUsersCount">{{sum_a}}</span>
                                     </div>
                                     <div class="card-footer d-flex align-items-center justify-content-between"></div>
                                 </div>
@@ -22,7 +22,7 @@
                                 <div id="totalUsersCard" class="card bg-warning text-white mb-4">
                                     <div class="card-body">
                                         <i class="fas fa-users"></i>
-                                        Total Users: <span id="totalUsers">100</span>
+                                        Total Categories: <span id="totalUsers">{{sum_c}}</span>
                                     </div>
                                     <div class="card-footer d-flex align-items-center justify-content-between"></div>
                                 </div>
@@ -42,7 +42,42 @@
                                 <i class="fas fa-chart-area me-1"></i>
                                 Traffic Analytics
                             </div>
-                            <div class="card-body"><canvas id="myAreaChart" width="100%" height="30"></canvas></div>
+                            
+                            <div class="card-body row">
+                                <div class="col-md-6">
+
+                                    <div style="display: flex; flex-direction: column; align-items: center;">
+                                        <script>
+                                            var categoryNames = {{ categories | tojson }};
+                                            var categoryData = {{ category_data | tojson }};
+                                        </script>
+                                        <canvas id="categoryChart" width="300" height="300"></canvas>
+                                        <script src="{{url_for('static', filename='/Admin/js/chart.js')}}"></script>
+                                        <!-- <div class="card-footer small text-muted">Updated in realtime</div> -->
+                                        
+                                    </div>
+                                    <div class="text-center">
+                                        <p>Số lượng bài báo theo loại</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div style="display: flex; flex-direction: column; align-items: center;">
+                                        <script>
+                                            var categoryLabels = {{ categories | tojson }};
+                                            var fake_Counts = {{ fakeCounts | tojson }};
+                                            var real_Counts={{realCounts| tojson}}
+                                        </script>
+                                        <canvas id="categoryChartBar" width="300" height="300"></canvas>
+                                        <script src="{{url_for('static', filename='/Admin/js/chart.js')}}"></script>
+                                        <!-- <div class="card-footer small text-muted">Updated in realtime</div> -->
+                                        
+                                    </div>
+                                    <div class="text-center">
+                                        <p>Số lượng tin fake và real</p>
+                                    </div>
+                                </div>
+                            </div>
                             <div class="card-footer small text-muted">Updated in realtime</div>
                         </div>
                         <div class="card mb-4">
@@ -66,7 +101,7 @@
                
                 <script src="{{url_for('static',filename='/Admin/assets/demo/chart-area-demo.js')}}"></script>
                 <script src="{{url_for('static',filename='/Admin/js/datatables-simple-demo.js')}}"></script>
-
+                
                 
 {% endblock %}
 
