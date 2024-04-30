@@ -4,6 +4,8 @@ from app.base.models import *
 from app.admin.model_detectfakenews import detect_fakenews
 from app import db
 from .handle import *
+from app.admin.model_detect.crawlData import start_crawl
+from datetime import datetime 
 
 @blueprint.route('/admin/', methods=['GET', 'POST'])
 def admin_home():
@@ -31,15 +33,58 @@ def view():
 
 @blueprint.route('/admin/crawler', methods=['GET', 'POST'])
 def crawler():
+    artical={}
     
-    if request.method == 'POST' and form.validate_on_submit():
-        form = request.form
-        url = form.get("url")
-        
+    if request.method == 'POST':
+        url_crawler = request.form.get("form_name")  # Lấy tên của biểu mẫu
+        print(url_crawler)
+        print("--------------------------")
+        artical = Article.query.filter_by(url=url_crawler).first()
+        if not artical:
+            #crawler
+            result = start_crawl(url_crawler)
+            # print(result)
+
+            title_=result.get("title")
+            
+            content_ = result.get("content")
+            published_date_str= result.get("published_date")
+            print("================")
+            # nếu mà ngày này mà rỗng thì cho là ngày crawl về nha
+            if published_date_str:  # Nếu chuỗi không rỗng
+                try:
+                    # Chuyển đổi chuỗi thành đối tượng datetime
+                    published_datetime = datetime.strptime(published_date_str, "%y-%m-%d %H:%M:%S")
+                    # Đối tượng datetime có thể được chuyển đổi thành date object nếu bạn chỉ quan tâm đến ngày
+                    published_date = published_datetime.date()
+                except ValueError:
+                    print("Chuỗi ngày tháng không đúng định dạng.")
+            else:
+                # Nếu chuỗi rỗng, đặt published_date bằng ngày hôm nay
+                published_date = datetime.now()
+            # published_date=datetime.now()
+            print ("====================")
+            print(published_date)
+            published_date_=published_date
+            data = detect_fakenews(url_crawler)
+            if data =="Safe news":
+                is_fake=0
+            else:
+                is_fake=1
+
+            new_article = Article(title = title_, url = url_crawler ,  content=content_, is_fake=is_fake ,image_url=result.get("top_img"), author="", category_id="",summerize="", created_at=published_date)
+            
+            # Thêm bài báo vào session
+            db.session.add(new_article)
+            
+            # Commit thay đổi vào cơ sở dữ liệu
+            db.session.commit()
+        # print(artical)
         #check urrl trong db , neu co check lai content
         # neu chua co -> crawl ve 
+    return render_template('admin/crawler1.html',  data=artical )
 
-    return render_template('admin/news_manager.html',   )
+
 
 from .tomtatvanban import Summerizer
 @blueprint.route('/admin/summerize', methods=['GET', 'POST'])
