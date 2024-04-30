@@ -117,7 +117,7 @@ def start_crawl(url):
     
     content = article.text
     
-    if(content == ''):
+    if(content == ""):
         content = re.sub('\\n+', '</p><p>', '<p>' + clean_json(content) + '</p>')
 
     result = {

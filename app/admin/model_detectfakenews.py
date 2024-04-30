@@ -17,24 +17,42 @@ def extract_text_from_url(url):
         return start_crawl(url)
     except Exception as e:
         return str(e)
+
+def getDomain(url):
+    split_url = url.split('/')
+    return split_url[2]
+
+def check_blacklist(domain):
+    basedir = os.path.abspath(os.path.dirname(__file__))
+    black = open(basedir+ "\\model_detect\\blacklist.txt").read().split("\n")
+    for item in black:
+        if(item in domain):
+            return True
     
-    
+    return False
+
 def detect_fakenews(url):
-    MODEL_PATH = os.path.join(basedir, r"model_detect/naive_bayes.pkl")
-    model = pickle.load(open(MODEL_PATH, 'rb'))
-
-
-    # Extract text content from URL
+    domain = getDomain(url)
     text = extract_text_from_url(url)
-    print("[debug]  ", text)
-    if  text:
+    
+    if(check_blacklist(domain)):
+        result = 'Danger news'
+    else:
+        MODEL_PATH = os.path.join(basedir, r"model_detect/naive_bayes.pkl")
+        model = pickle.load(open(MODEL_PATH, 'rb'))
+        print("Su dung model fakenews")
+
+        # Extract text content from URL
+        print("[debug]  ", text)
+        
         preprocessed_text = preprocess_text(text['content'])
         # Predict label using the model
         predicted_label = model.predict([preprocessed_text])[0]
         if predicted_label == 1:
             result = 'Safe news'
-        else : result  = 'Danger news'
-        
-        text['predicted_label'] = result
-        
-        return text
+        else : result  = 'Danger news!'
+    
+            
+    text['predicted_label'] = result
+    
+    return text
