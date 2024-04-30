@@ -4,7 +4,8 @@ from app.base.models import *
 from app.admin.model_detectfakenews import detect_fakenews
 from app import db
 from .handle import *
-from datetime import datetime
+from app.admin.model_detect.crawlData import start_crawl
+from datetime import datetime 
 @blueprint.route('/admin/', methods=['GET', 'POST'])
 def admin_home():
     return render_template('admin/index.html')
@@ -32,13 +33,13 @@ def view():
 @blueprint.route('/admin/crawler', methods=['GET', 'POST'])
 def crawler():
     artical={}
-    published_date=""
+
     if request.method == 'POST':
         url_crawler = request.form.get("form_name")  # Lấy tên của biểu mẫu
         print(url_crawler)
         print("--------------------------")
         artical = Article.query.filter_by(url=url_crawler).first()
-        
+
         if not artical:
             #crawler
             result = start_crawl(url_crawler)
@@ -62,10 +63,9 @@ def crawler():
                 # Nếu chuỗi rỗng, đặt published_date bằng ngày hôm nay
                 published_date = datetime.now()
             # published_date=datetime.now()
-        
             print ("====================")
             print(published_date)
-            # published_date_=published_date
+            published_date_=published_date
             data = detect_fakenews(url_crawler)
             if data =="Safe news":
                 is_fake=0
@@ -108,7 +108,7 @@ def detectnews():
         form = request.form
         url = form.get("url")
         data = detect_fakenews(url)
-        print(data)
+        # print(data)
     return render_template('admin/thongtindetect.html', data=data )
 
 
