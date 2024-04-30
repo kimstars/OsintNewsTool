@@ -108,7 +108,7 @@ def detectnews():
         form = request.form
         url = form.get("url")
         data = detect_fakenews(url)
-        print(data)
+        # print(data)
     return render_template('admin/thongtindetect.html', data=data )
 
 
