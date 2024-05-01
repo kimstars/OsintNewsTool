@@ -1,7 +1,7 @@
 from flask import Blueprint, render_template, current_app, url_for, request, redirect, abort, session, flash, jsonify,  make_response
 from app.admin import blueprint
 from app.base.models import *
-from app.admin.model_detectfakenews import detect_fakenews
+from app.admin.model_detect.crawlData import start_crawl, crawl_unoffical, crawl_offical
 from app import db
 from .handle import *
 
@@ -32,14 +32,20 @@ def view():
 @blueprint.route('/admin/crawler', methods=['GET', 'POST'])
 def crawler():
     
-    if request.method == 'POST' and form.validate_on_submit():
+    listNews = []
+    listurl= ""
+    if request.method == 'POST':
         form = request.form
-        url = form.get("url")
-        
-        #check urrl trong db , neu co check lai content
-        # neu chua co -> crawl ve 
+        listurl = form.get("listUrl")
+        if(listurl is not None):
+            listurl = listurl.split("\n")
+            print(listurl)
+            for url in listurl:
+                data = start_crawl(url.strip())
+                listNews.append(data)
+                print(data)
 
-    return render_template('admin/news_manager.html',   )
+    return render_template('admin/trangcaodulieu.html', listNews=listNews, predata=listurl )
 
 from .tomtatvanban import Summerizer
 @blueprint.route('/admin/summerize', methods=['GET', 'POST'])
@@ -62,12 +68,12 @@ def detectnews():
     if request.method == 'POST':
         form = request.form
         url = form.get("url")
-        data = detect_fakenews(url)
-        # print(data)
+        data = start_crawl(url)
+        print(data)
     return render_template('admin/thongtindetect.html', data=data )
 
 
-@blueprint.route('/admin/getInfoURL', methods=['GET', 'POST'])
+@blueprint.route('/admin/search', methods=['GET', 'POST'])
 def getInfoURL():
     data = {}
     url = ""
@@ -83,7 +89,32 @@ def getInfoURL():
                            )
     
 
+ 
+@blueprint.route('/admin/cluster_news', methods=['GET', 'POST'])
+def cluster_news():
+    result = crawl_offical()
+    
+    return render_template('admin/ketquaphancum.html',result=result )
 
+
+
+@blueprint.route('/admin/article/<int:article_id>', methods=['GET', 'POST'])
+def one_article(article_id):
+    
+    article = Article.query.get(article_id)
+    keywords = ", ".join([keyword.name for keyword in article.keywords])
+    return render_template('admin/chitietbaibao.html',data=article, keywords=keywords )
+
+
+
+# 3-----------------------------
+@blueprint.route('/test', methods=['GET', 'POST'])
+def test_keyword():
+    article = Article.query.get(1)
+    keywords = [keyword.name for keyword in article.keywords]
+    print(keywords)
+    return jsonify(keywords)
+    
 # @blueprint.route('/admin/add_keyword/<article_id>/<keyword_name>', methods=['GET'])
 
 

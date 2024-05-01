@@ -63,37 +63,30 @@ def search_bm25(terms):
         }
     return temp
 
-
-def is_not_exist_article(url):
-    try:
-        item  = Article.query.filter_by(url=url).first()
-        if(item is None):
-            return True
-        else:
-            return False
-    except Exception as e:
-        print("Đã tồn tại URL = ", url)
-        return False
-    
+def checkExist(url):
+    existing_article = Article.query.filter_by(url=url).first()
+    if existing_article:
+        print("Da ton tai !", url)
+        return existing_article
+    else:
+        return None
 
 def InsertArticle(data):
-    if (is_not_exist_article(data['url'])):
-        new_article = Article(data['title'], 
-                    data['url'],
-                    data['image_url'],
-                    data['author'],
-                    data['category_id'],
-                    data['content'],
-                    data['summerize'],
-                    data['create_at'],
-                    data['sentiment'],
-                    data['is_fake'],
-                    )
+    # Kiểm tra xem bài viết đã tồn tại trong cơ sở dữ liệu hay chưa
+    existing_article = Article.query.filter_by(url=data['url']).first()
 
+    if existing_article:
+        # Cập nhật thông tin của bài viết
+        for key, value in data.items():
+            setattr(existing_article, key, value)
+        db.session.commit()
+        return existing_article.id
+    else:
+        # Thêm mới bài viết vào cơ sở dữ liệu
+        new_article = Article(**data)
         db.session.add(new_article)
         db.session.commit()
-        
-        return new_article.id
+        return new_article
         
 
 

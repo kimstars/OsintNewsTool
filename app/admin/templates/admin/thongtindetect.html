@@ -30,12 +30,16 @@
         <div class="mt-4">
             <h3>Kết quả:</h3>
             <div class="card">
-                <div class="card-body" id="responseData">
-                    <h4 id="prelabel">* Phân loại:</h4>{{data['predicted_label']}}
+                <div class="card-body" id="">
+                    <div id="responseData">
+                        <h4 >* Phân loại: {{data['predicted_label']}} </h4>
+                    </div>
+
                     <h4>* Tiêu đề:</h4>{{data['title']}}
                     <h4>* URL:</h4>{{data['url']}}
                     <h4>* Keywords:</h4>{{data['keywords']}}
-                    <h4>* Nội dung:</h4>{{data['content']}}
+                    <h4>* Nội dung tóm tắt:</h4>{{data['summerize']}}
+                    <h4>* Nội dung :</h4>{{data['content']}}
 
                 </div>
             </div>
@@ -45,7 +49,7 @@
 </main>
 
 <script>
-    var responseData = {{data|tojson}};
+    var responseData = {{data}};
     if (responseData && responseData["predicted_label"] == "Danger news") {
         document.getElementById('responseData').classList.add('bg-danger');
     }else{

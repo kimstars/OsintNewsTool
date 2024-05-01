@@ -35,7 +35,7 @@
                         <th scope="col">#</th>
                         <th scope="col">Tiêu đề</th>
                         <th scope="col">URL</th>
-                        <th scope="col">Tác giả</th>
+                        <th scope="col">Ảnh nổi bật</th>
                         <th scope="col">Nội dung</th>
                         <th scope="col">Tóm tắt</th>
                         <th scope="col">Thời gian</th>
@@ -46,11 +46,11 @@
                         {% for item in listNews %}
                             <tr>
                                 <td>{{item.id}}</td>
-                                <td>{{item.title}}</td>
-                                <td>{{item.url}}</td>
-                                <td>{{item.author}}</td>
-                                <td>{{item.content[:100]}} ...</td>
-                                <td>{{item.summerize}}</td>
+                                <td><a href="/admin/article/{{item.id}}">{{item.title}}</a></td>
+                                <td><a href={{item.url}} >{{item.url}}</a></td>
+                                <td><img src={{item.image_url}} style="width:90%;height:90%;"> </td>
+                                <td>{{item.content[:200]}} ...</td>
+                                <td>{{item.summerize[:100]}}</td>
                                 <td>{{item.created_at}}</td>
                                 <td>{{item.is_fake}}</td>
                                

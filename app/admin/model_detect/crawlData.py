@@ -1,9 +1,14 @@
 import re
 import json
 import validators
-from newspaper import Article
+from newspaper import Article as BaiBao
 from bs4 import BeautifulSoup
 from .todate import *
+from ..model_detectfakenews import detect_content,check_blacklist
+from ..handle import *
+from ..tomtatvanban import Summerizer
+
+from ..clustering.cluster_article import PhanCum
 
 def is_url(url):
     return validators.url(url)
@@ -39,7 +44,9 @@ def crawler_viettan(url):
         'Accept-Encoding': 'gzip, deflate, br',
         'Connection': 'keep-alive'
     }
-
+    if("amp" not in url):
+        url += "/amp"
+        
     # url= "https://viettan.org/thu-di-tim-duong-cuu-nuoc/"
     while(True):
         try:
@@ -51,112 +58,350 @@ def crawler_viettan(url):
         except :
             pass
 
-
-    content = response.content
-
-    soup = BeautifulSoup(content, "html.parser")
-    title = soup.find("h1", class_="elementor-heading-title elementor-size-default").text
+    soup = BeautifulSoup(response.content, "html.parser")
+    
         
     # with open("output.html", "w", encoding="utf-8") as f:
     #     f.write(str(soup))
 
-    author = soup.find("span",class_="elementor-icon-list-text elementor-post-info__item elementor-post-info__item--type-author").text.strip()
+    title = soup.find("h1", class_="amp-wp-title").text
+    author = soup.find("div",class_="author").text.strip()
+    art_time = soup.find("meta",{'property': 'article:published_time'})['content'].strip()
+    image = soup.find("amp-img",class_="attachment-large")['src']
+    content = soup.find("div",class_="amp-wp-article-content").text.strip()
 
-    art_time = soup.find("span",class_="elementor-icon-list-text elementor-post-info__item elementor-post-info__item--type-date").text.strip()
-
-    image = soup.find("div", class_="elementor-image").find('img')['src']
-
-    divs = soup.find_all("div", class_="elementor-widget-container")
-    content = ""
-    for div in divs:
-        paragraphs = (get_text_from_tag(p) for p in soup.find_all("p"))
-        for p in paragraphs:
-            content += p
             
     result = {
                 'url': url,
                 'title': title,
                 'keywords': "",
                 'author': author,
-                'published_date': todatetime(art_time, 1),
+                'published_date': todatetime(art_time),
                 'top_img': image,
-                'content': content
+                'content': content,
+                'summerize': Summerizer(content,3)
             }
     return result
 
 
-
-
-from ..handle import InsertArticle, add_keyword_to_article
-
 def start_crawl(url):
-    domain = getDomain(url)
-    
-    if not is_url(url):
-        result = {
-            'url': url,
-            'error': 'Url không hợp lệ!',
-            'success': False
-        }
+    checkexist = checkExist(url)
+    if(checkexist is None):
+        print("here")
+        domain = getDomain(url)
+        
+        if not is_url(url):
+            result = {
+                'url': url,
+                'error': 'Url không hợp lệ!',
+                'success': False
+            }
 
-        return result
+            return result
+
+        result = {}
+        if("viettan.org" in domain):
+            print("detect viettan ", url)
+            result =  crawler_viettan(url)
+        else:
+            print("detect bai viet thuong ", url)
+            
+            while(1):
+                try:
+                    article = BaiBao(url)
+                    article.download()
+                    article.parse()
+                    if(article):
+                        break
+                except:
+                    pass
+            print("access 200")
+            content = article.text
+            
+            if(content == ""):
+                content = re.sub('\\n+', '</p><p>', '<p>' + clean_json(content) + '</p>')
+
+            # tom tat van ban 
+            content_sum = Summerizer(content,2)
+
+            # lay thoi gian dang bai
+            pub_date = todatetime(article.publish_date if article.publish_date else article.meta_data.get('pubdate', ''))
+            if(pub_date is None):
+                pub_date = extract_time(url)
+                if(pub_date is None):
+                    pub_date = datetime.datetime.now()
+                    print("laytam now", pub_date)
+                    
+            result = {
+                        'url': url,
+                        'error': '',
+                        'success': True,
+                        'title': article.title,
+                        'keywords': article.keywords if article.keywords else (
+                            article.meta_keywords if article.meta_keywords else article.meta_data.get('keywords', [])),
+                        'published_date': pub_date,
+                        'top_img': article.top_image,
+                        'content': content,
+                        'summerize' : content_sum
+                    }
+        
+        # them bai bao moi vao csdl
+        
+        result_isfake = detect_content(result["content"])
+       
+
+        data = {
+                "title" : result["title"],
+                "url" : result["url"],
+                "image_url" : result["top_img"],
+                "author" : "",
+                "category_id": 1,
+                "content" : result["content"],
+                "summerize" : result["summerize"],
+                "created_at" : result['published_date'],
+                "sentiment" : "",
+                "is_fake" : result_isfake
+            }
+
+        isInBlacklist = False
+        if(check_blacklist(domain)):
+            data["is_fake"] = True
+            isInBlacklist= True
+            
+        
     
-    
-    result = {}
-    if("viettan.org" in domain):
-        print("detect viettan ", url)
-        result =  crawler_viettan(url)
+        print(data)
+        item_id = InsertArticle(data).id
+        print("them bai bao", item_id)
+        
+        # them keyword
+        print("them keyword")
+        for key in result['keywords']:
+            temp = key.lower().strip()
+            ret = add_keyword_to_article(item_id, temp)
+            print(f"{temp} => {ret}")
+        
+        if result_isfake or isInBlacklist:
+            data['predicted_label'] = "Danger news"
+        else : data['predicted_label']  = 'Safe news'
+        data['keywords'] = result['keywords']
+        return data
+        
     else:
-        while(1):
-            try:
-                article = Article(url)
-                article.download()
-                article.parse()
-                if(article):
-                    break
-            except:
-                pass
-        
-        content = article.text
-        
-        if(content == ""):
-            content = re.sub('\\n+', '</p><p>', '<p>' + clean_json(content) + '</p>')
+        data = {}
+        data['title'] = checkexist.title
+        data['is_fake'] = checkexist.is_fake
+        data['author'] = checkexist.author
+        data['image_url'] = checkexist.image_url
+        data['created_at'] = checkexist.created_at
+        data['summerize'] = checkexist.summerize
+        data['content'] = checkexist.content
+        data['keywords'] = [keyword.name for keyword in checkexist.keywords]
 
-        result = {
-                    'url': url,
-                    'error': '',
-                    'success': True,
-                    'title': article.title,
-                    'keywords': ', '.join(article.keywords if article.keywords else (
-                        article.meta_keywords if article.meta_keywords else article.meta_data.get('keywords', []))),
-                    'published_date': article.publish_date if article.publish_date else article.meta_data.get('pubdate', ''),
-                    'top_img': article.top_image,
-                    'content': content
-                }
+        if data['is_fake'] :
+            data['predicted_label'] = "Danger news"
+        else : data['predicted_label']  = 'Safe news'
+        
+        return data
     
-    # them bai bao moi vao csdl
-    print("kiet checkkk=====================================>",str(result['published_date']))
-    # data = {
-    #         "title" : result["title"],
-    #         "url" : result["url"],
-    #         "image_url" : result["top_img"],
-    #         "author" : "",
-    #         "category_id": 1,
-    #         "content" : result["content"],
-    #         "summerize" : "",
-    #         "create_at" : result['published_date'],
-    #         "sentiment" : "",
-    #         "is_fake" : ""
-    #     }
-    # item_id = InsertArticle(data)
+
+
+
+def crawl_bbcnews(url):
+    ua = UserAgent()
+
+    while(True):
+        try:
+            headers = {
+                'User-Agent': ua.random,
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive'
+            }
+            response = requests.get(url, headers=headers)
+            print(response.status_code)
+            code = response.status_code
+            if(str(code) == "200"):
+                break
+        except :
+            pass
+
+
+    soup = BeautifulSoup(response.content, "html.parser")
+    with open("output.html", "w", encoding="utf-8") as f:
+            f.write(str(soup))
+
+    title = soup.find("h1", class_ = "bbc-e0ctyc e1p3vdyi0").text
+    pub_time = soup.find("div", class_ = "bbc-19j92fr ebmt73l0").find("time")['datetime']
+    tag_p = soup.find_all("p", class_ = "bbc-1y32vyc e17g058b0")
+    top_img = soup.find("div", class_ = "bbc-j1srjl").find("img")['src']
+    # author  = soup.find("span", class_ = "bbc-18ttg5u").text
+
+    content = ""
+    for pitem in tag_p:
+        content += pitem.text
+
+    data = {
+        "title" : title,
+        "url" : url,
+        "image_url" : top_img,
+        "author" : "phandong",
+        "category_id": 1,
+        "created_at": todatetime(pub_time),
+        "content" : content,
+        "summerize" : Summerizer(content,3),
+        "is_fake" : True
+    }
+
+    return data
+
+def crawl_vnexpress(url):
+    article = BaiBao(url)
+    article.download()
+    article.parse()
+
+    content = article.text
+    headline = article.title
+    url = article.url
+    top_img = article.top_img
+    author = article.authors
+
+    data = {
+        "title" : headline,
+        "url" : url,
+        "image_url" : top_img,
+        "author" : "vnexpress",
+        "content" : content,
+        "category_id": 1,
+        "created_at": extract_time(url),
+        "summerize" : Summerizer(content,3),
+        "is_fake" : True
+    }
+    print(data)
     
-    # # them keyword
-    # for key in result['keywords']:
-    #     temp = key.lower().strip()
-    #     ret = add_keyword_to_article(item_id, temp)
-    #     print(f"{temp} => {ret}")
+    return data
+
+
+def crawl_unoffical():
+    ua = UserAgent()
+    headers = {
+        'User-Agent': ua.random,
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive'
+    }
+
+    url= "https://www.bbc.com/vietnamese/topics/ckdxnx1x5rnt?page="
+    data = []
+    count = 0
+    for i in range(1,4):
+        
+        tempurl = url+ str(i)
+        print("page = ", tempurl)
+        while(True):
+            try:
+                response = requests.get(tempurl, headers=headers)
+                print(response.status_code)
+                code = response.status_code
+                if(str(code) == "200"):
+                    break
+            except :
+                pass
+        content = response.content
+        soup = BeautifulSoup(content, "html.parser")
+        with open("output.html", "w", encoding="utf-8") as f:
+            f.write(str(soup))
+
+        all_art = soup.find_all("li", class_="bbc-t44f9r")
+        
+        for item in all_art:
+            item_t = item.find("a")
+            title = item_t.text
+            url_item = item_t['href']
+            if("articles" in url_item):
+                print("Đang cào ", title, url_item)
+                #neu ton tai roi -> thoi ko cao
+                checkexist = checkExist(url_item)
+                if(checkexist is None):
+                    temp_data  = crawl_bbcnews(url_item)
+                    item_new = InsertArticle(temp_data)
+                    print("Insert new acticle ", item_new)
+                    data.append(item_new)
+                    
+                else:
+                    temp_data = checkexist
+                    data.append(temp_data)
+                
+                print(count)
+                count += 1
+                
+                # if(count > 10):
+                #     break
+        
+    result = PhanCum(data)
     
     return result
+    
 
+def crawl_offical():
+    ua = UserAgent()
+    headers = {
+        'User-Agent': ua.random,
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'Connection': 'keep-alive'
+    }
+
+    data = []
+    url = "https://vnexpress.net/thoi-su/chinh-tri-p"
     
-    
+    count = 0
+    for i in range(1,4):
+        tempurl = url + str(i)
+        print(f"---------------------------------Page {i}")
+        
+        while(True):
+            try:
+                response = requests.get(tempurl, headers=headers)
+                code = response.status_code
+                print(tempurl, code)
+                if(str(code) == "200"):
+                    break
+            except :
+                pass
+
+
+        content = response.content
+
+        soup = BeautifulSoup(content, "html.parser")
+
+        # with open("output.html", "w", encoding="utf-8") as f:
+        #         f.write(str(soup))
+                
+        all_art = soup.find_all("article", class_="item-news thumb-left item-news-common")
+        
+        for item in all_art:
+            class_title = item.find("h2", class_="title-news")
+            title = class_title.text
+            url_item = class_title.find("a")['href']
+            print("Đang cào ", title, url_item)
+        
+            checkexist = checkExist(url_item)
+            if(checkexist is None):
+                temp_data  = crawl_vnexpress(url_item)
+                item_new = InsertArticle(temp_data)
+                print("Insert new acticle ", item_new)
+                data.append(item_new)
+                
+            else:
+                temp_data = checkexist
+                data.append(temp_data)
+            
+            print(count)
+            count += 1
+        
+    if(len(data) > 0):
+        result = PhanCum(data)
+    else:
+        result = None
+    return result

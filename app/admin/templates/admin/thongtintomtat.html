@@ -11,32 +11,29 @@
             <li class="breadcrumb-item active">Tóm tắt tin tức</li>
         </ol>
         
-        <div class="container">
-            <div class="row justify-content-center">
-                <div class="">
-                    <form id="classificationForm" action="/admin/summerize" method="post" style="margin-top: 100px;">
-                        <div class="input-group mb-3">
-                            <textarea class="form-control" name="content" class="form-control" placeholder="Nhập bài báo cần tóm tắt..." rows="5" style="border-radius: 50;">{{pre_data}}</textarea>
+        
+        <form id="classificationForm" action="/admin/summerize" method="post" style="margin-top: 15px;">
+            <div class="input-group mb-3">
+                <textarea class="form-control" name="content" class="form-control" placeholder="Nhập bài báo cần tóm tắt..." rows="10" style="border-radius: 50;">{{pre_data}}</textarea>
 
-                        </div>
-
-                        <div class="input-group mb-3">
-
-                        <select name="numsentence" class="form-select" aria-label="Default select example">
-                            <option selected>Lựa chọn độ dài tóm tắt</option>
-                            <option value="1">1 Câu</option>
-                            <option value="5">5 câu</option>
-                            <option value="10">10 câu</option>
-                          </select>
-
-                        </div>
-
-                        <button type="submit" class="btn btn-primary" style="border-radius: 50;">Tóm tắt</button>
-
-                    </form>
-                </div>
             </div>
-        </div>
+
+            <div class="input-group mb-3">
+
+            <select name="numsentence" class="form-select" aria-label="Default select example">
+                <option selected>Lựa chọn độ dài tóm tắt</option>
+                <option value="1">1 Câu</option>
+                <option value="5">5 câu</option>
+                <option value="10">10 câu</option>
+                </select>
+
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="border-radius: 50;">Tóm tắt</button>
+
+        </form>
+    
+           
     
         
         <div class="mt-4">
