@@ -31,7 +31,7 @@
                                 <div id="offlineUsersCard" class="card bg-danger text-white mb-4">
                                     <div class="card-body">
                                         <i class="fas fa-users"></i>
-                                        Offline Users: <span id="offlineUsers">3</span>
+                                        Total Keywords: <span id="offlineUsers">{{sum_k}}</span>
                                     </div>
                                     <div class="card-footer d-flex align-items-center justify-content-between"></div>
                                 </div>
@@ -51,7 +51,7 @@
                                             var categoryNames = {{ categories | tojson }};
                                             var categoryData = {{ category_data | tojson }};
                                         </script>
-                                        <canvas id="categoryChart" width="300" height="300"></canvas>
+                                        <canvas id="categoryChart" width="400" height="400"></canvas>
                                         <script src="{{url_for('static', filename='/Admin/js/chart.js')}}"></script>
                                         <!-- <div class="card-footer small text-muted">Updated in realtime</div> -->
                                         
@@ -68,7 +68,7 @@
                                             var fake_Counts = {{ fakeCounts | tojson }};
                                             var real_Counts={{realCounts| tojson}}
                                         </script>
-                                        <canvas id="categoryChartBar" width="300" height="300"></canvas>
+                                        <canvas id="categoryChartBar" width="200" height="200"></canvas>
                                         <script src="{{url_for('static', filename='/Admin/js/chart.js')}}"></script>
                                         <!-- <div class="card-footer small text-muted">Updated in realtime</div> -->
                                         
