@@ -49,16 +49,17 @@ document.addEventListener('DOMContentLoaded', function() {
             datasets: [{
                 label: 'Fake Counts',
                 data: fake_Counts,
-                backgroundColor: 'rgba(255, 99, 132, 0.2)',
-                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 159, 64, 0.2)', // Màu cam nhạt
+                borderColor: 'rgba(255, 159, 64, 1)', // Màu cam
                 borderWidth: 1
             }, {
                 label: 'Real Counts',
                 data: real_Counts,
-                backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(153, 102, 255, 0.2)', // Màu tím nhạt
+                borderColor: 'rgba(153, 102, 255, 1)', // Màu tím
                 borderWidth: 1
             }]
+            
         },
         options: {
             scales: {

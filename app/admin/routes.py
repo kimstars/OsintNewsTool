@@ -6,6 +6,7 @@ from app import db
 from .handle import *
 from app.admin.model_detect.crawlData import start_crawl
 from datetime import datetime 
+import sqlite3
 @blueprint.route('/admin/', methods=['GET', 'POST'])
 def admin_home():
 
@@ -38,11 +39,30 @@ def admin_home():
     print(fakeCounts,realCounts)
 
     # dùng để vẽ biểu đồ top 10 số lượng keywords
+    conn = sqlite3.connect('osintnews1.db')
+    cursor = conn.cursor()
+
+    # Execute the SQL query to get top 10 keywords with most articles
+    cursor.execute("""
+        SELECT k.name, COUNT(ak.article_id) AS article_count
+        FROM keywords AS k
+        JOIN article_keyword AS ak ON ak.keyword_id = k.id
+        JOIN articles AS a ON a.id = ak.article_id
+        GROUP BY ak.keyword_id
+        ORDER BY article_count DESC
+        LIMIT 10
+    """)
     
+    # Fetch all the results
+    query_result = cursor.fetchall()
+    
+    # Close the database connection
+    conn.close()
 
-
-
-    return render_template('admin/index.html', sum_a=sum_articles, sum_c = sum_categories, sum_k=sum_keywords, categories=categories_name, category_data=category_counts, fakeCounts=fakeCounts, realCounts=realCounts)
+    print(query_result)
+    labels = [result[0] for result in query_result]
+    data = [result[1] for result in query_result] 
+    return render_template('admin/index.html', sum_a=sum_articles, sum_c = sum_categories, sum_k=sum_keywords, categories=categories_name, category_data=category_counts, fakeCounts=fakeCounts, realCounts=realCounts, key_name = labels, count_articles = data, data= query_result)
     
 
 @blueprint.route('/admin/chart', methods=['GET', 'POST'])
