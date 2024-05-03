@@ -2,12 +2,75 @@ from flask import Blueprint, render_template, current_app, url_for, request, red
 from app.admin import blueprint
 from app.base.models import *
 from app.admin.model_detect.crawlData import start_crawl, crawl_unoffical, crawl_offical, crawl_rss
+from app.admin.model_detect.todate import *
 from app import db
 from .handle import *
+from sqlalchemy import func
+from datetime import datetime, timedelta
 
 @blueprint.route('/admin/', methods=['GET', 'POST'])
 def admin_home():
-    return render_template('admin/index.html')
+    # Bai viet moi them gan day
+    recent_date = datetime.now() - timedelta(days=1)
+    recent_art = Article.query.filter(func.DATE(Article.created_at) == func.DATE(recent_date)).all()
+
+    
+    sum_articles = Article.query.count()
+    sum_categories = Category.query.count()
+    sum_keywords= Keyword.query.count()
+
+    #biểu đồ PIE tỉ lệ tin giả/ tin thật
+    
+    fn_fakeCount= Article.query.filter_by(is_fake=1).count()
+    fn_realCount = Article.query.filter_by(is_fake=0).count()
+    outfn_count =[fn_realCount,fn_fakeCount]
+    
+    # biểu đồ PIE Danh mục 
+    categories = Category.query.distinct(Category.name).all()
+    categories_name = [category.name for category in categories]
+    category_counts = [Article.query.filter_by(category_id=category.id).count() for category in categories]
+    print(category_counts)
+    print(categories_name)
+    fakeCounts=[]
+    realCounts=[]
+
+
+    for category in categories:
+        fakeCount= Article.query.filter_by(category_id=category.id, is_fake=1).count()
+        realCount = Article.query.filter_by(category_id=category.id, is_fake=0).count()
+        fakeCounts.append(fakeCount)
+        realCounts.append(realCount)
+    print(fakeCounts,realCounts)
+    
+    
+    # keywords = Keyword.query.all()
+    # data_key = []
+    # for item in keywords:
+    #     count_temp = db.session.query(Article).join(Article.keywords).filter(Keyword.id==item.id).count()
+    #     temp_data = {
+    #         "name": item.name,
+    #         "numart" : count_temp
+    #     }
+    #     data_key.append(temp_data)
+      
+    
+    # top_keyword = sorted(data_key, key=lambda item: item['numart'], reverse=True)[:10]
+    
+    top_keyword = Keyword.query.limit(10).all()
+    
+    print(top_keyword)
+    
+    # Bieu do area -> Lay so luong bai bao 7 ngay gan day
+    date, numNews = GetNumArtByDate()
+    print("so luong bai bao 7 ngay gan day : ", date, numNews)
+    
+    
+    return render_template('admin/index.html', sum_a=sum_articles, sum_c = sum_categories, sum_k=sum_keywords, categories=categories_name, category_data=category_counts, fakeCounts=fakeCounts, realCounts=realCounts,
+    fnDataCount = outfn_count,
+    listNews = recent_art,
+    top10Keyword = top_keyword,
+    dateLable = date, numNews = numNews
+    )
 
 
 @blueprint.route('/admin/chart', methods=['GET', 'POST'])
@@ -23,8 +86,15 @@ def admin_chart():
 @blueprint.route('/admin/managernews', methods=['GET', 'POST'])
 def view():
     
-    query = Article.query.all()
-
+    query = Article.query.limit(10).all()
+    
+    if request.method == 'POST':
+        form = request.form
+        startDate = form.get("startDate")
+        endDate = form.get("endDate")
+        print(startDate, type(startDate), endDate)
+        query = Article.query.filter(func.DATE(Article.created_at) >= todatetime(startDate)).filter(func.DATE(Article.created_at) <= todatetime(endDate)).all()
+        print("query thanh cong ", len(query))
     return render_template('admin/news_manager.html',listNews=query)
 
 
@@ -118,7 +188,8 @@ def cate_manager():
             {
                 "id":item.id,
                 "name":item.name,
-                "numrss": db.session.query(RssPaper).filter_by(category_id=item.id).count()
+                "numrss": db.session.query(RssPaper).filter_by(category_id=item.id).count(),
+                "numart": db.session.query(Article).filter_by(category_id=item.id).count()
 
             }
         )
@@ -155,17 +226,19 @@ def add_rss():
         cate_id = form.get("cate_id")
         listRSS = listRSS.split("\n")
         for item in listRSS:
-            url = item.strip()
-            temp_data = {
-                "domain" : getDomain(url),
-                "url": url, 
-                "cate_id": cate_id
-            }
-            InsertRSS(temp_data)
+            if(item!= ""):
+                url = item.strip()
+                print("addrss => ",url)
+                temp_data = {
+                    "domain" : getDomain(url),
+                    "url": url, 
+                    "cate_id": cate_id
+                }
+                InsertRSS(temp_data)
         
         print('done add rss', len(listRSS))
             
-        return redirect(url_for("/admin/rss_manager/"))
+        return redirect(url_for("admin.rss_manager"))
 
 # xem chi tiet bai bao
 @blueprint.route('/admin/rss_crawl/<int:rss_id>', methods=['GET', 'POST'])
@@ -187,8 +260,24 @@ def test_keyword():
     article = Article.query.get(1)
     keywords = [keyword.name for keyword in article.keywords]
     print(keywords)
+    
     return jsonify(keywords)
     
 # @blueprint.route('/admin/add_keyword/<article_id>/<keyword_name>', methods=['GET'])
 
 
+# lay bai bao theo thoi gian
+
+# keywords = Keyword.query.all()
+# data_key = []
+# for item in keywords:
+#     count_temp = db.session.query(Article).join(Article.keywords).filter(Keyword.id==item.id).count()
+#     temp_data = {
+#         "name": item.name,
+#         "numart" : count_temp
+#     }
+#     data_key.append(temp_data)
+
+
+
+    

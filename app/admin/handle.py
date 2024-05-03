@@ -146,3 +146,27 @@ def InsertRSS(data):
         db.session.commit()
     
 
+from sqlalchemy import func
+from datetime import datetime, timedelta
+
+def GetNumArtByDate():
+    date = []
+    numNews = []
+    # Lặp qua 7 ngày gần đây
+    for day in range(0,8):
+        # Tính ngày cụ thể trong quá khứ
+        recent_date = datetime.now() - timedelta(days=day)
+        # Đếm số lượng bài báo trong ngày đó
+        count_art = Article.query.filter(func.DATE(Article.created_at) == func.DATE(recent_date)).count()
+
+        date.append(recent_date.strftime('%Y-%m-%d'))
+        numNews.append(count_art)
+    
+    date = date[::-1]    
+    numNews = numNews[::-1]    
+    print(date)
+    print(numNews)
+    return date, numNews
+
+        
+    

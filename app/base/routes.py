@@ -13,6 +13,7 @@ def getNavBar():
 
 @blueprint.route('/', methods=['GET', 'POST'])
 def home():
+    
     return render_template('index.html')
 
 
@@ -65,7 +66,7 @@ def test():
     return str(data)
     
     
-@blueprint.route('/delete/', methods=['GET', 'POST'])
+@blueprint.route('/delete', methods=['GET', 'POST'])
 def delete_fromdb():
     article_id = 4241
     article = Article.query.get(article_id)
@@ -73,10 +74,12 @@ def delete_fromdb():
         db.session.delete(article)
         db.session.commit()
     
-    keywords_to_delete = Keyword.query.filter(Keyword.id > 1).all()
+    keywords_to_delete = Keyword.query.all()
     for keyword in keywords_to_delete:
-        print(keyword.name)
-        db.session.delete(keyword)
+        if(keyword.name == ""):
+            print("found")
+            db.session.delete(keyword)
+            
     db.session.commit()
     
     return 'Keywords with id greater than 2 have been deleted successfully'
