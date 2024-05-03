@@ -37,7 +37,7 @@
 
 <script>
     var responseData = {{data}};
-    if (responseData && responseData["predicted_label"] == "Danger news") {
+    if (responseData && responseData["is_fake"] == True) {
         document.getElementById('responseData').classList.add('bg-danger');
     }else{
         document.getElementById('responseData').classList.add('bg-success');

@@ -169,7 +169,8 @@ def start_crawl(url):
             isInBlacklist= True
             
         
-    
+        # INSERT bài báo vào CSDL
+        
         print(data)
         item_id = InsertArticle(data).id
         print("them bai bao", item_id)
@@ -264,7 +265,7 @@ def crawl_vnexpress(url):
     headline = article.title
     url = article.url
     top_img = article.top_img
-    author = article.authors
+    
 
     data = {
         "title" : headline,
@@ -275,7 +276,7 @@ def crawl_vnexpress(url):
         "category_id": 1,
         "created_at": extract_time(url),
         "summerize" : Summerizer(content,3),
-        "is_fake" : True
+        "is_fake" : detect_content(content)
     }
     print(data)
     
@@ -322,7 +323,7 @@ def crawl_unoffical():
                 print("Đang cào ", title, url_item)
                 #neu ton tai roi -> thoi ko cao
                 checkexist = checkExist(url_item)
-                if(checkexist is None):
+                if(checkexist is not None):
                     temp_data  = crawl_bbcnews(url_item)
                     item_new = InsertArticle(temp_data)
                     print("Insert new acticle ", item_new)
@@ -405,3 +406,106 @@ def crawl_offical():
     else:
         result = None
     return result
+
+
+def crawl_rss(url , cate_id):
+    response = requests.get(url)
+    print(response.status_code)
+    content = response.content
+
+    soup = BeautifulSoup(content, "html.parser")
+
+    with open("output.html", "w", encoding="utf-8") as f:
+            f.write(str(soup))
+            
+    all_art = soup.find_all("item")
+    data = []
+    for item in all_art:
+        # item = all_art[0]
+        title = item.find("title").text.strip()
+        pub_time = item.find("pubdate").text.strip()
+        print("time =>", pub_time)
+        temp = BeautifulSoup(item.find("description").text, "html.parser")
+        temp_url = temp.find('a')['href']
+        description = temp.text.strip()
+        top_img = temp.find('img')['src']
+
+        temp_data = {
+            "title" : title,
+            "url" : temp_url,
+            "image_url" : top_img,
+            "author" : "",
+            "category_id": cate_id,
+            "created_at": todatetime(pub_time),
+            "content" : description,
+            "is_fake" : False
+        }
+        
+        print(f"{title} => {temp_url}")
+                
+        new_data = crawl_content_rss(temp_data)
+        
+        data.append(new_data)
+    
+    return data
+
+
+
+def crawl_content_rss(data):
+    checkexist = checkExist(data["url"])
+    if(checkexist is None):
+        domain = getDomain(data["url"])         
+        n = 0
+        while(1):
+            try:
+                article = BaiBao(data["url"])
+                article.download()
+                article.parse()
+                n+=1
+                if(article ):
+                    break
+                if(n > 10):
+                    return {}
+            except:
+                pass
+
+        content = article.text
+        
+        if(content == ""):
+            content = re.sub('\\n+', '</p><p>', '<p>' + clean_json(content) + '</p>')
+
+        # tom tat van ban 
+        content_sum = Summerizer(content,2)
+        
+        data["content"] = content
+        data["summerize"] = content_sum
+        # them bai bao moi vao csdl
+        
+        data["is_fake"] = detect_content(data["content"])
+     
+
+        if(check_blacklist(domain)):
+            data["is_fake"] = True
+        
+        # INSERT bài báo vào CSDL
+        
+        print(data)
+        item_id = InsertArticle(data).id
+        print("them bai bao", item_id)
+        
+        # them keyword
+        print("them keyword")
+        keyword =  article.keywords if article.keywords else article.meta_keywords if article.meta_keywords else article.meta_data.get('keywords', [])
+        print(keyword)
+        for key in keyword:
+            temp = key.lower().strip()
+            ret = add_keyword_to_article(item_id, temp)
+            print(f"{temp} => {ret}")
+        
+        
+        return data
+   
+    else:
+        return checkexist
+    
+

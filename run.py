@@ -10,6 +10,9 @@ from config import config_dict
 
 from app import create_app, db
 
+
+from app.admin.model_detect.crawlData import crawl_rss
+
 try:
 
     app_config = config_dict['Debug']
@@ -22,6 +25,6 @@ app = create_app(app_config)
 Migrate(app, db)
 
 
-
 if __name__ == "__main__":
+    
     app.run()

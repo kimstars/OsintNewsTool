@@ -3,6 +3,12 @@
 from app.base.models import *
 from app import db
 
+
+def getDomain(url):
+    split_url = url.split('/')
+    return split_url[2]
+
+
 def get_info_url(keyword):
     
     data = Article.query.filter(Article.title.contain(keyword)).all()
@@ -80,7 +86,7 @@ def InsertArticle(data):
         for key, value in data.items():
             setattr(existing_article, key, value)
         db.session.commit()
-        return existing_article.id
+        return existing_article
     else:
         # Thêm mới bài viết vào cơ sở dữ liệu
         new_article = Article(**data)
@@ -105,5 +111,38 @@ def add_keyword_to_article(article_id, keyword_name):
         return False
 
 
+from datetime import datetime
 
+
+def InsertCategory(cate_name):
+    # Kiểm tra đã tồn tại trong cơ sở dữ liệu hay chưa
+    existing_cate = Category.query.filter_by(name=cate_name).first()
+
+    if existing_cate:
+
+        return existing_cate.id
+    else:
+        current_dateTime = datetime.now()
+        new_category = Category(name=cate_name, created_at=current_dateTime)
+        # Thêm đối tượng vào cơ sở dữ liệu
+        db.session.add(new_category)
+        db.session.commit()
+
+        
+
+def InsertRSS(data):
+    # Kiểm tra đã tồn tại trong cơ sở dữ liệu hay chưa
+    existing_article = RssPaper.query.filter_by(url=data['url']).first()
+
+    if existing_article:
+        for key, value in data.items():
+            setattr(existing_article, key, value)
+        db.session.commit()
+        return existing_article.id
+    else:
+        new_rss = RssPaper(domain=data['domain'], url=data['url'], category_id=data['cate_id'])
+        # Thêm đối tượng vào cơ sở dữ liệu
+        db.session.add(new_rss)
+        db.session.commit()
+    
 

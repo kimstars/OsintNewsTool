@@ -35,8 +35,24 @@ class Article(db.Model):
         self.sentiment = sentiment
         self.is_fake = is_fake
 
-# https://github.com/radupotop/fts-api/blob/master/model.py
 
+
+class RssPaper(db.Model):
+    __tablename__ = 'rsspapers'
+
+    id = Column(Integer, primary_key=True, autoincrement=True)
+    domain = Column(String(255), nullable=False)
+    url = Column(String(255))
+    category_id = Column(Integer, ForeignKey('categories.id'), nullable=True)
+    created_at = Column(DateTime, nullable=False)
+
+    category = relationship('Category', backref='rsspapers')
+    
+    def __init__(self, domain, url,category_id):
+        self.domain = domain
+        self.url = url
+        self.category_id = category_id
+        self.created_at = datetime.datetime.now()
 
 
 class Category(db.Model):
@@ -49,6 +65,7 @@ class Category(db.Model):
     def __init__(self, name, created_at):
         self.name = name
         self.created_at = created_at
+        
 
 class Event(db.Model):
     __tablename__ = 'events'

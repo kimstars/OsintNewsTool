@@ -4,9 +4,11 @@ from importlib import import_module
 from logging import basicConfig, DEBUG, getLogger, StreamHandler
 from os import path
 
+
 db = SQLAlchemy()
 
 
+    
 def register_extensions(app):
     db.init_app(app)
 
@@ -29,7 +31,9 @@ def configure_database(app):
 def create_app(config):
     app = Flask(__name__, static_folder='base/static')
     app.config.from_object(config)
+    
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)
+    
     return app
