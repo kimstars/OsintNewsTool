@@ -7,6 +7,8 @@ from app import db
 from .handle import *
 from sqlalchemy import func
 from datetime import datetime, timedelta
+import os 
+basedir = os.path.abspath(os.path.dirname(__file__))
 
 @blueprint.route('/admin/', methods=['GET', 'POST'])
 def admin_home():
@@ -43,23 +45,11 @@ def admin_home():
     print(fakeCounts,realCounts)
     
     
-    # keywords = Keyword.query.all()
-    # data_key = []
-    # for item in keywords:
-    #     count_temp = db.session.query(Article).join(Article.keywords).filter(Keyword.id==item.id).count()
-    #     temp_data = {
-    #         "name": item.name,
-    #         "numart" : count_temp
-    #     }
-    #     data_key.append(temp_data)
+    keywords = Keyword.query.all()
       
+    top_keyword = sorted(keywords, key=lambda item: item.num_art, reverse=True)[:10]
     
-    # top_keyword = sorted(data_key, key=lambda item: item['numart'], reverse=True)[:10]
-    
-    top_keyword = Keyword.query.limit(10).all()
-    
-    print(top_keyword)
-    
+
     # Bieu do area -> Lay so luong bai bao 7 ngay gan day
     date, numNews = GetNumArtByDate()
     print("so luong bai bao 7 ngay gan day : ", date, numNews)
@@ -146,16 +136,17 @@ def detectnews():
 @blueprint.route('/admin/search', methods=['GET', 'POST'])
 def getInfoURL():
     data = {}
-    url = ""
+    keyword = ""
     if request.method == 'POST':
         form = request.form
-        url = form.get("url")
-        data = search_bm25(url)
-        print(data)
+        keyword = form.get("keyword")
+        print(keyword)
+        data = search_bm25(keyword)
     return render_template('admin/trangtimkiem.html'
                         #    , soketqua=data['soketqua'] ,data=data['listdata']
-                           , keyword=url,
-                           scores = data
+                           , keyword=keyword,
+                           data = data,
+                           soketqua = len(data)
                            )
     
 
@@ -252,6 +243,13 @@ def rss_crawl(rss_id):
     return render_template('admin/trangcaodulieu.html', listNews=listNews, predata=[], title=rssUrl)
 
 
+@blueprint.route('/admin/newsbykey/<int:key_id>', methods=['GET', 'POST'])
+def newsbykey(key_id):
+    keywordItem = Keyword.query.get(key_id)
+    listNews = keywordItem.articles
+    print(len(listNews))
+    return render_template('admin/news_keyword.html', data=listNews, soketqua= len(listNews), keyword=keywordItem.name )
+
 
 
 # 3-----------------------------
@@ -262,8 +260,42 @@ def test_keyword():
     print(keywords)
     
     return jsonify(keywords)
+
+
+
+#---------------------- job function
     
 # @blueprint.route('/admin/add_keyword/<article_id>/<keyword_name>', methods=['GET'])
+
+@blueprint.route('/cronjob', methods=['GET', 'POST'])
+def job_function():
+    all_rss = RssPaper.query.all()  
+    import time
+    for item in all_rss:
+        try:
+            print(f'Bắt đầu cập nhật từ RSS: {item.url}')
+            cate_id = item.category.id
+            listNews = crawl_rss(item.url, cate_id)
+            time.sleep(300) # nghỉ 5 phút
+            print(f'Cập nhật thành công RSS_URL: {item.url} => số lượng {len(listNews)}')
+            
+        except Exception as e:
+            print(f'Error synchronizing URL {item.url}: {str(e)}')
+
+
+# ----------- thong ke nguon tin khong chinh thong
+@blueprint.route('/admin/unofficalnews', methods=['GET', 'POST'])
+def unofficalnews():
+    black = open(basedir+ "\\model_detect\\blacklist.txt").read().split("\n")
+    
+    article = Article.query.get(1)
+    keywords = [keyword.name for keyword in article.keywords]
+    print(keywords)
+    
+    return jsonify(keywords)
+
+
+
 
 
 # lay bai bao theo thoi gian
@@ -277,6 +309,7 @@ def test_keyword():
 #         "numart" : count_temp
 #     }
 #     data_key.append(temp_data)
+
 
 
 

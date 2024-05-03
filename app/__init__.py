@@ -4,13 +4,23 @@ from importlib import import_module
 from logging import basicConfig, DEBUG, getLogger, StreamHandler
 from os import path
 
+import requests
+
+# def my_task():
+#     r =  requests.get("http://127.0.0.1:5000/cronjob")
+#     print('hi im running every 5 seconds')
+    
+# from apscheduler.schedulers.background import BackgroundScheduler  
+# sched = BackgroundScheduler(daemon=True)
+# sched.add_job(my_task,'interval',minutes=1)
+# sched.start()
 
 db = SQLAlchemy()
-
 
     
 def register_extensions(app):
     db.init_app(app)
+ 
 
 
 def register_blueprints(app):
@@ -30,10 +40,11 @@ def configure_database(app):
 
 def create_app(config):
     app = Flask(__name__, static_folder='base/static')
-    app.config.from_object(config)
     
+    app.config.from_object(config)
+
     register_extensions(app)
     register_blueprints(app)
     configure_database(app)
-    
+
     return app

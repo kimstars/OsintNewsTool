@@ -97,14 +97,15 @@ class Keyword(db.Model):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     name = Column(String(100), nullable=False, unique=True)
+    num_art = Column(Integer, nullable=False, unique=True)
     created_at = Column(DateTime, nullable=False)
 
     articles = relationship('Article', secondary='article_keyword', back_populates='keywords')
 
-    def __init__(self, name):
+    def __init__(self, name, num_art):
         time = datetime.datetime.now()
         self.name = name
-        
+        self.num_art =  num_art
         self.created_at = time
        
             

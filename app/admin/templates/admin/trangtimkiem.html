@@ -1,24 +1,25 @@
 {% extends "/admin/layout.html" %}
-{% block title %} Tóm tắt tin tức {% endblock %}
+{% block title %} Tìm kiếm tin tức  {% endblock %}
 {% block body %}
 
 
 <main>
     <div class="container-fluid px-4">
-        <h1 class="mt-4">Tóm tắt tin tức</h1>
+        <h1 class="mt-4">Tìm kiếm tin tức với thuật toán BM25 </h1>
         <ol class="breadcrumb mb-4">
-            <li class="breadcrumb-item"><a href="/User/Index">Dashboard</a></li>
-            <li class="breadcrumb-item active">Tóm tắt tin tức</li>
+            <li class="breadcrumb-item"><a href="/admin">Dashboard</a></li>
+            <li class="breadcrumb-item active">Tìm kiếm tin tức </li>
         </ol>
         
         
         <div class="container">
             <div class="row justify-content-center">
                 <div class="col-md-6">
-                    <form id="classificationForm" action="/admin/getInfoURL" method="post" style="margin-top: 100px;">
+                    <form id="classificationForm" action="/admin/search" method="post" style="margin-top: 20px;">
                         <div class="input-group mb-3">
-                            <input type="text" id="urlInput" name="url" class="form-control" placeholder="Nhập URL cần kiểm tra..." required style="border-radius: 50;">
-                            <button type="submit" class="btn btn-primary" style="border-radius: 50;">Classify</button>
+                            <input type="text" id="keyword" name="keyword" class="form-control" placeholder="Nhập từ khóa cần tìm kiếm" required style="border-radius: 50;">
+                            
+                            <button type="submit" class="btn btn-primary" style="border-radius: 50;">Tìm kiếm</button>
                         </div>
                     </form>
                 </div>
@@ -26,10 +27,10 @@
         </div>
     
         
+        {%if data %}
         <div class="mt-4">
          <h3> Kết quả tìm kiếm "{{keyword}}" : {{soketqua}}  kết quả </h3>
             <p> {{scores}} </p>
-            {%if data %}
             <div class="card">
                 <div class="card-body" id="responseData">
         
@@ -37,9 +38,9 @@
                         <thead>
                             <tr>
                             <th scope="col">#</th>
-                            <th scope="col">Tiêu đề</th>
-                            <th scope="col">URL</th>
-                            <th scope="col">Nội dung</th>
+                            <th scope="col">Từ khóa</th>
+                            <th scope="col">Số bài báo</th>
+                            <th scope="col">Xem danh sách bài báo</th>
                            
                             </tr>
                         </thead>
@@ -47,9 +48,9 @@
                             {% for item in data %}
                                 <tr>
                                     <td>{{item.id}}</td>
-                                    <td>{{item.title}}</td>
-                                    <td>{{item.url}}</td>
-                                    <td>{{item.content[:100]}} ...</td>
+                                    <td>{{item.name}}</td>
+                                    <td>{{item.num_art}}</td>
+                                    <td><button type="button" class="btn btn-success" onclick="window.location.href='/admin/newsbykey/{{item.id}}'">Xem các bài báo</button></td>
                                     
                                    
                                 </tr>
@@ -59,15 +60,21 @@
                    
                 </div>
             </div>
-            {% endif %}
         </div>
+        {% endif %}
     </div>
 </main>
 
 
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/5.0.12/signalr.min.js"></script>
-<script src="/Admin/js/site.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+<script src="https://cdnjs.com/libraries/bootstrap-datetimepicker/4.17.37" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/simple-datatables@7.1.2/dist/umd/simple-datatables.min.js" crossorigin="anonymous"></script>
+
+
+<script src="{{url_for('static',filename='/Admin/js/scripts.js')}}"></script>
+<script src="{{url_for('static',filename='/Admin/js/datatables-simple.js')}}"></script>
+
 
 
 {% endblock %}

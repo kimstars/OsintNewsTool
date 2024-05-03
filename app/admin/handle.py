@@ -53,21 +53,23 @@ from underthesea import word_tokenize
 def search_bm25(terms):
     queries = word_tokenize(terms)
     print(queries)
-    texts = [item.content for item in Article.query.all()]
+    listKeyword = Keyword.query.all()
+    texts = [item.name for item in listKeyword]
     scores = bm25_search(queries, texts)
-    print(scores)
-    max_score_index = max(range(len(scores)), key=scores.__getitem__)
-
-    item  = Article.query.filter_by(id=max_score_index).first()
-    temp = {}
-    if(item):
+    data_temp = []
+    for i in range(len(texts)):
         temp = {
-            "url" : item.url,
-            "content" : item.content,
-            "title" : item.title,
-            "id": item.id
+            "id" : listKeyword[i].id,
+            "name" : listKeyword[i].name,
+            "num_art" : listKeyword[i].num_art,
+            "score" : scores[i],
         }
-    return temp
+        data_temp.append(temp)
+        
+    result = sorted(data_temp, key=lambda item: item['score'], reverse=True)[:10]
+    print("Ket qua tim kiem : ")
+    print(result)
+    return result
 
 def checkExist(url):
     existing_article = Article.query.filter_by(url=url).first()
@@ -101,7 +103,7 @@ def add_keyword_to_article(article_id, keyword_name):
         article = Article.query.get(article_id)
         keyword = Keyword.query.filter_by(name=keyword_name).first()
         if not keyword:
-            keyword = Keyword(name=keyword_name)
+            keyword = Keyword(name=keyword_name, num_art=1)
             db.session.add(keyword)
         article.keywords.append(keyword)
         db.session.commit()

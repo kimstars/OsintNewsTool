@@ -84,4 +84,15 @@ def delete_fromdb():
     
     return 'Keywords with id greater than 2 have been deleted successfully'
 
+@blueprint.route('/update', methods=['GET', 'POST'])
+def update_keyword():
+    
+    keywords = Keyword.query.all()
+    
+    for item in keywords:
+        count_temp = db.session.query(Article).join(Article.keywords).filter(Keyword.id==item.id).count()
+        item.num_art = count_temp 
+        print(item)
+    db.session.commit()
+    return "Cập nhật thành công"
     

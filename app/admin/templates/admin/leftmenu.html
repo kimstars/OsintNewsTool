@@ -23,7 +23,8 @@
                             <a class="nav-link" href="/admin/managernews">Tất cả các tin</a>
                             <a class="nav-link" href="/admin/cate_manager">Quản lý danh mục</a>
                             <a class="nav-link" href="/admin/rss_manager">Quản lý RSS</a>
-                            <a class="nav-link" href="/admin/crawler">Cào dữ liệu </a>
+                            <a class="nav-link" href="/admin/keyword_manager">Quản lý Keyword</a>
+                            <a class="nav-link" href="/admin/search">Tìm kiếm tin tức </a>
                         </nav>
                     </div>
                 </div>
@@ -42,8 +43,8 @@
                             <a class="nav-link" href="/admin/crawler">Cào dữ liệu trang báo </a>
                             <a class="nav-link" href="/admin/summerize">Tóm tắt bài báo </a>
                             <a class="nav-link" href="/admin/cluster_news">Phân cụm thông tin </a> 
-                            <a class="nav-link" href="/admin/crawler">Sự kiện nổi bật </a> 
-         
+                            <a class="nav-link" href="/admin/">Sự kiện nổi bật </a> 
+    
                         </nav>
                     </div>
     
@@ -54,18 +55,30 @@
             <div>
                 <div class="sb-sidenav-menu-heading">Trinh sát tin tức</div>
                 
-                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#collapseLayouts"
-                    aria-expanded="false" aria-controls="collapseLayouts">
+                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#nguontinchinhthong"
+                    aria-expanded="false" aria-controls="nguontinchinhthong">
                     <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
                                         Nguồn tin chính thống
                     <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
                 </a>
-                <div class="collapse" id="collapseLayouts" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                <div class="collapse" id="nguontinchinhthong" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
                     <nav class="sb-sidenav-menu-nested nav">
-                        <a class="nav-link" href="/admin/managernews">Tất cả các tin</a>
-                        <a class="nav-link" href="/admin/crawler">Cào dữ liệu một trang báo </a>
+                        <a class="nav-link" href="/admin/officalnews">Thống kê</a>
                     </nav>
                 </div>
+
+                <a class="nav-link collapsed" href="#" data-bs-toggle="collapse" data-bs-target="#nguontinchinhthong"
+                aria-expanded="false" aria-controls="nguontinchinhthong">
+                <div class="sb-nav-link-icon"><i class="fas fa-columns"></i></div>
+                                    Nguồn tin không chính thống
+                <div class="sb-sidenav-collapse-arrow"><i class="fas fa-angle-down"></i></div>
+            </a>
+            <div class="collapse" id="nguontinchinhthong" aria-labelledby="headingOne" data-bs-parent="#sidenavAccordion">
+                <nav class="sb-sidenav-menu-nested nav">
+                    <a class="nav-link" href="/admin/unofficalnews">Thống kê</a>
+                    
+                </nav>
+            </div>
 
             </div>
 

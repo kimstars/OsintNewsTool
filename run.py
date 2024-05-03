@@ -11,7 +11,6 @@ from config import config_dict
 from app import create_app, db
 
 
-from app.admin.model_detect.crawlData import crawl_rss
 
 try:
 

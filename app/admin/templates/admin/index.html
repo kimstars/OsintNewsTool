@@ -131,15 +131,15 @@
                                 <thead class="bg-light">
                                     <tr class="border-0">
                                         <th class="border-0">Keywords</th>
-                                        <th class="border-0">Artiles</th>
+                                        <th class="border-0">Số lượng bài báo</th>
 
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {% for dt in top10Keyword %}
                                     <tr>
-                                        <td>{{dt["name"]}}</td>
-                                        <td>{{dt["numart"]}} </td>
+                                        <td><a href="/admin/newsbykey/{{dt.id}}">{{dt.name}} </a></td>
+                                        <td>{{dt.num_art}} </td>
 
                                     </tr>
                                     {% endfor %}

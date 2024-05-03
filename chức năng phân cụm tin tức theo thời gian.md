@@ -86,3 +86,15 @@ https://www.gitauharrison.com/articles/data-visualization-with-flask-and-chartjs
 
 ![image-20240503052852104](C:\Users\CHU-TUAN-KIET\AppData\Roaming\Typora\typora-user-images\image-20240503052852104.png)
 
+
+
+
+
+Chức năng lọc theo thời gian:
+
+
+
+- [ ] Lọc bài báo theo thời gian
+- [ ] Lấy keyword nổi bật theo thời gian
+- [ ] Tìm kiếm bài viết theo từ khóa
+- [ ] 

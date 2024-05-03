@@ -7,7 +7,7 @@ from .todate import *
 from ..model_detectfakenews import detect_content,check_blacklist
 from ..handle import *
 from ..tomtatvanban import Summerizer
-
+import datetime
 from ..clustering.cluster_article import PhanCum
 
 def is_url(url):
@@ -33,10 +33,6 @@ from bs4 import BeautifulSoup, NavigableString
 from fake_useragent import UserAgent
 
 def crawler_viettan(url):
-    def get_text_from_tag(tag):
-        if isinstance(tag, NavigableString):
-            return tag
-        return tag.text
     ua = UserAgent()
     headers = {
         'User-Agent': ua.random,
@@ -129,7 +125,7 @@ def start_crawl(url):
             if(pub_date is None):
                 pub_date = extract_time(url)
                 if(pub_date is None):
-                    pub_date = datetime.datetime.now()
+                    pub_date = datetime.now()
                     print("laytam now", pub_date)
                     
             result = {
