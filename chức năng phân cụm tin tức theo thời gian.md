@@ -98,3 +98,12 @@ Chức năng lọc theo thời gian:
 - [ ] Lấy keyword nổi bật theo thời gian
 - [ ] Tìm kiếm bài viết theo từ khóa
 - [ ] 
+
+
+
+Trinh sát nguồn tin ko chính thông 
+
+* đăng bao nhiêu bài
+* các keyword nổi bật
+* số bài viết theo ngày
+* 

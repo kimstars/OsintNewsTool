@@ -1,4 +1,5 @@
 from flask import Blueprint, render_template, current_app, url_for, request, redirect, abort, session, flash, jsonify,  make_response
+from sqlalchemy import desc
 from app.admin import blueprint
 from app.base.models import *
 from app.admin.model_detect.crawlData import start_crawl, crawl_unoffical, crawl_offical, crawl_rss
@@ -13,8 +14,8 @@ basedir = os.path.abspath(os.path.dirname(__file__))
 @blueprint.route('/admin/', methods=['GET', 'POST'])
 def admin_home():
     # Bai viet moi them gan day
-    recent_date = datetime.now() - timedelta(days=1)
-    recent_art = Article.query.filter(func.DATE(Article.created_at) == func.DATE(recent_date)).all()
+    recent_date = datetime.now()
+    recent_art = Article.query.filter(func.DATE(Article.created_at) == func.DATE(recent_date)).order_by(desc(Article.created_at)).all()
 
     
     sum_articles = Article.query.count()
@@ -45,10 +46,18 @@ def admin_home():
     print(fakeCounts,realCounts)
     
     
-    keywords = Keyword.query.all()
+    keywords = Keyword.query.order_by(desc(Keyword.num_art)).all()
       
-    top_keyword = sorted(keywords, key=lambda item: item.num_art, reverse=True)[:10]
-    
+    # top_keyword = sorted(keywords, key=lambda item: item.num_art, reverse=True)[:10]
+    top_keyword = []
+    count = 0
+    for itemkey in keywords:
+        if(len(itemkey.name.split(" ")) > 2):
+            top_keyword.append(itemkey)
+            count += 1
+        if(count == 10):
+            break
+             
 
     # Bieu do area -> Lay so luong bai bao 7 ngay gan day
     date, numNews = GetNumArtByDate()
@@ -286,13 +295,29 @@ def job_function():
 # ----------- thong ke nguon tin khong chinh thong
 @blueprint.route('/admin/unofficalnews', methods=['GET', 'POST'])
 def unofficalnews():
-    black = open(basedir+ "\\model_detect\\blacklist.txt").read().split("\n")
+    label = ['việt_nam', 'hình_ảnh', 'mỹ', 'vinfast', 'trung_quốc', 'chủ_tịch', 'vụ', 'vàng', 'đảng', 'quốc_hội', 'công_ty', 'ngân_hàng', 'chụp', 'thông_tin', 'dự_án', 'đi', 'nhà_nước', 'kênh', 'campuchia', 'scb', 'bbc', 'tiền', 'sông', 'quy_định', 'hoạt_động', 'quốc_gia', 'trung_ương', 'bộ_chính_trị', 'phim', 'đầu', 'đầu_tư', 'vương_đình_huệ', 'kinh_tế', 'tham_nhũng', 'tập_đoàn', 'chính_phủ', 'án', 'getty_images_chụp', 'quốc_tế', 'báo', 'thái_lan', 'thị_trường', 'việt', 'đồng', 'phó', 'uỷ_viên', 'thủ_tướng', 'tổ_chức', 'giá', 'đào']
+    count = [1004, 443, 288, 281, 269, 240, 211, 206, 187, 181, 180, 175, 156, 155, 152, 151, 149, 148, 148, 146, 145, 141, 139, 137, 134, 133, 132, 128, 123, 121, 119, 117, 117, 116, 115, 110, 107, 105, 103, 102, 102, 101, 100, 100, 99, 98, 97, 97, 95, 94]
+
+    # crawl_unoffical()
     
-    article = Article.query.get(1)
-    keywords = [keyword.name for keyword in article.keywords]
-    print(keywords)
+    data = {
+        "label" : label,
+        "count" : count,
+        "max" : max(count)
+    }
+    result_bbc = []
     
-    return jsonify(keywords)
+    listNews = Article.query.order_by(desc(Article.created_at)).all()
+    for item in listNews:
+        if("bbc.com" in item.url):
+            result_bbc.append(item)
+            
+    print(len(result_bbc))
+    
+    
+    link_img_wordlcound = url_for('static',filename='/Admin/assets/img/word_cloud.png') 
+   
+    return render_template('admin/unoffical_manager.html', data=data, listNews=result_bbc, linkimg = link_img_wordlcound)
 
 
 

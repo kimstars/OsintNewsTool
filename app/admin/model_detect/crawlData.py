@@ -335,10 +335,15 @@ def crawl_unoffical():
                 # if(count > 10):
                 #     break
         
+    return data
+    
+    
+
+def cluster_data(data):
+    crawl_unoffical()
     result = PhanCum(data)
-    
     return result
-    
+
 
 def crawl_offical():
     ua = UserAgent()
