@@ -6,14 +6,14 @@ from os import path
 
 import requests
 
-def my_task():
-    r =  requests.get("http://127.0.0.1:5000/cronjob")
-    print('hi im running every 15 minutes')
+# def my_task():
+#     r =  requests.get("http://127.0.0.1:5000/cronjob")
+#     print('hi im running every 15 minutes')
     
-from apscheduler.schedulers.background import BackgroundScheduler  
-sched = BackgroundScheduler(daemon=True)
-sched.add_job(my_task,'interval',minutes=15)
-sched.start()
+# from apscheduler.schedulers.background import BackgroundScheduler  
+# sched = BackgroundScheduler(daemon=True)
+# sched.add_job(my_task,'interval',minutes=15)
+# sched.start()
 
 db = SQLAlchemy()
 

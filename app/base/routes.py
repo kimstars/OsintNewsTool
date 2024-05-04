@@ -84,8 +84,8 @@ def delete_fromdb():
     
     return 'Keywords with id greater than 2 have been deleted successfully'
 
-@blueprint.route('/update', methods=['GET', 'POST'])
-def update_keyword():
+@blueprint.route('/updatekeyword', methods=['GET', 'POST'])
+def updatekeyword():
     
     keywords = Keyword.query.all()
     
@@ -93,6 +93,19 @@ def update_keyword():
         count_temp = db.session.query(Article).join(Article.keywords).filter(Keyword.id==item.id).count()
         item.num_art = count_temp 
         print(item)
+    db.session.commit()
+    return "Cập nhật thành công"
+
+@blueprint.route('/updatecate', methods=['GET', 'POST'])
+def updatecate():
+    
+    listart = Article.query.all()
+    
+    for item in listart:
+        if("viettan.org" in item.url):
+            item.category_id = 4
+            item.is_fake = True
+            print(item)
     db.session.commit()
     return "Cập nhật thành công"
     

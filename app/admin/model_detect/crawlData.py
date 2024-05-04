@@ -34,18 +34,19 @@ from fake_useragent import UserAgent
 
 def crawler_viettan(url):
     ua = UserAgent()
-    headers = {
-        'User-Agent': ua.random,
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive'
-    }
+    
     if("amp" not in url):
         url += "/amp"
         
     # url= "https://viettan.org/thu-di-tim-duong-cuu-nuoc/"
     while(True):
         try:
+            headers = {
+                'User-Agent': ua.random,
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive'
+            }
             response = requests.get(url, headers=headers)
             # print(response.status_code)
             code = response.status_code
@@ -63,20 +64,25 @@ def crawler_viettan(url):
     title = soup.find("h1", class_="amp-wp-title").text
     author = soup.find("div",class_="author").text.strip()
     art_time = soup.find("meta",{'property': 'article:published_time'})['content'].strip()
-    image = soup.find("amp-img",class_="attachment-large")['src']
+    try:
+        image = soup.find("amp-img",class_="attachment-large")['src']
+    except:
+        image = ""
     content = soup.find("div",class_="amp-wp-article-content").text.strip()
 
             
     result = {
                 'url': url,
                 'title': title,
-                'keywords': "",
                 'author': author,
-                'published_date': todatetime(art_time),
-                'top_img': image,
+                'category_id': 4,
+                'keywords': "",
+                "created_at": todatetime(art_time),
+                "image_url": image,
                 'content': content,
                 'summerize': Summerizer(content,3)
             }
+    print(result)
     return result
 
 
@@ -135,8 +141,8 @@ def start_crawl(url):
                         'title': article.title,
                         'keywords': article.keywords if article.keywords else (
                             article.meta_keywords if article.meta_keywords else article.meta_data.get('keywords', [])),
-                        'published_date': pub_date,
-                        'top_img': article.top_image,
+                        "created_at": pub_date,
+                        "image_url": article.top_image,
                         'content': content,
                         'summerize' : content_sum
                     }
@@ -149,12 +155,12 @@ def start_crawl(url):
         data = {
                 "title" : result["title"],
                 "url" : result["url"],
-                "image_url" : result["top_img"],
+                "image_url" : result["image_url"],
                 "author" : "",
                 "category_id": 1,
                 "content" : result["content"],
                 "summerize" : result["summerize"],
-                "created_at" : result['published_date'],
+                "created_at" : result["created_at"],
                 "sentiment" : "",
                 "is_fake" : result_isfake
             }
@@ -281,12 +287,7 @@ def crawl_vnexpress(url):
 
 def crawl_unoffical():
     ua = UserAgent()
-    headers = {
-        'User-Agent': ua.random,
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive'
-    }
+    
 
     url= "https://www.bbc.com/vietnamese/topics/ckdxnx1x5rnt?page="
     data = []
@@ -297,6 +298,12 @@ def crawl_unoffical():
         print("page = ", tempurl)
         while(True):
             try:
+                headers = {
+                    'User-Agent': ua.random,
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive'
+                }
                 response = requests.get(tempurl, headers=headers)
                 print(response.status_code)
                 code = response.status_code
@@ -347,12 +354,7 @@ def cluster_data(data):
 
 def crawl_offical():
     ua = UserAgent()
-    headers = {
-        'User-Agent': ua.random,
-        'Accept-Language': 'en-US,en;q=0.9',
-        'Accept-Encoding': 'gzip, deflate, br',
-        'Connection': 'keep-alive'
-    }
+    
 
     data = []
     url = "https://vnexpress.net/thoi-su/chinh-tri-p"
@@ -364,6 +366,12 @@ def crawl_offical():
         
         while(True):
             try:
+                headers = {
+                    'User-Agent': ua.random,
+                    'Accept-Language': 'en-US,en;q=0.9',
+                    'Accept-Encoding': 'gzip, deflate, br',
+                    'Connection': 'keep-alive'
+                }
                 response = requests.get(tempurl, headers=headers)
                 code = response.status_code
                 print(tempurl, code)
@@ -500,8 +508,9 @@ def crawl_content_rss(data):
         print(keyword)
         for key in keyword:
             temp = key.lower().strip()
-            ret = add_keyword_to_article(item_id, temp)
-            print(f"{temp} => {ret}")
+            if(temp != ""):
+                ret = add_keyword_to_article(item_id, temp)
+                print(f"{temp} => {ret}")
         
         
         return data
@@ -510,3 +519,76 @@ def crawl_content_rss(data):
         return checkexist
     
 
+
+def crawlviettan_bytime(time_string): 
+    
+    url= "https://viettan.org/"+time_string
+    print(url)
+
+    ua = UserAgent()
+
+    while(True):
+        try:
+            headers = {
+                'User-Agent': ua.random,
+                'Accept-Language': 'en-US,en;q=0.9',
+                'Accept-Encoding': 'gzip, deflate, br',
+                'Connection': 'keep-alive'
+            } 
+            response = requests.get(url, headers=headers)
+            print(response.status_code)
+            code = response.status_code
+            if(str(code) == "200"):
+                break
+        except :
+            pass
+
+
+    content = response.content
+
+    soup = BeautifulSoup(content, "html.parser")
+    title = soup.find("h1", class_="elementor-heading-title elementor-size-default")
+        
+    # with open("date.html", "w", encoding="utf-8") as f:
+    #     f.write(str(soup))
+
+    baibao = soup.find_all("article")
+
+    result = []
+
+    for itembao in baibao:
+        post_title = itembao.find("h3", class_="elementor-post__title")
+
+        link = post_title.find("a")['href']
+        print(link)        
+        checkexist = checkExist(link)
+        if(checkexist is None):
+            temp_data  = crawler_viettan(link)
+            data = {
+                "title" : temp_data["title"],
+                "url" : temp_data["url"],
+                "image_url" : temp_data["image_url"],
+                "author" : "",
+                "category_id": 1,
+                "content" : temp_data["content"],
+                "summerize" : temp_data["summerize"],
+                "created_at" : temp_data["created_at"],
+                "sentiment" : "",
+                "is_fake" : 1
+            }
+
+            item_new = InsertArticle(data)
+            print("Insert new acticle ", item_new)
+            result.append(item_new)
+            
+        else:
+            temp_data = checkexist
+            result.append(temp_data)
+        
+        print(temp_data)
+        
+        
+    return result
+    
+        
+# crawlviettan_bytime(date_options['month'])

@@ -2,7 +2,7 @@ from flask import Blueprint, render_template, current_app, url_for, request, red
 from sqlalchemy import desc
 from app.admin import blueprint
 from app.base.models import *
-from app.admin.model_detect.crawlData import start_crawl, crawl_unoffical, crawl_offical, crawl_rss
+from app.admin.model_detect.crawlData import *
 from app.admin.model_detect.todate import *
 from app import db
 from .handle import *
@@ -85,7 +85,8 @@ def admin_chart():
 @blueprint.route('/admin/managernews', methods=['GET', 'POST'])
 def view():
     
-    query = Article.query.limit(10).all()
+    # query = Article.query.limit(10).all()
+    query = Article.query.all()
     
     if request.method == 'POST':
         form = request.form
@@ -318,6 +319,33 @@ def unofficalnews():
     link_img_wordlcound = url_for('static',filename='/Admin/assets/img/word_cloud.png') 
    
     return render_template('admin/unoffical_manager.html', data=data, listNews=result_bbc, linkimg = link_img_wordlcound)
+
+
+def format_date_options(date):
+    options = {}
+    options['year'] = date.strftime('%Y')  # Lấy năm
+    options['thismonth'] = date.strftime('%Y/%m')  # Lấy tháng và năm (ví dụ: 2024/04)
+    options['day'] = date.strftime('%Y/%m/%d')  # Lấy ngày, tháng và năm (ví dụ: 2024/04/24)
+    previous_month = date.replace(day=1) - timedelta(days=1)
+    options['premonth'] = previous_month.strftime('%Y/%m')  # Lấy tháng trước và năm (ví dụ: 2024/03)
+    return options
+
+
+# ----------------- trinh sat viet tan
+@blueprint.route('/admin/viettanosint', methods=['GET', 'POST'])
+def viettanosint():
+
+    listNews= []
+    if request.method == 'POST':
+        form = request.form
+        dateop = form.get("dateop")
+        date_input = datetime.today()
+        date_options = format_date_options(date_input)
+        time_str = date_options[dateop]
+        print(time_str)
+        listNews = crawlviettan_bytime(time_str)
+    
+    return render_template('admin/viettan_manager.html', listNews=listNews)
 
 
 
