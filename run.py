@@ -3,7 +3,7 @@
 Copyright (c) 2019 - present AppSeed.us
 """
 
-from flask_migrate import Migrate
+# from flask_migrate import Migrate
 from os import environ
 from sys import exit
 from config import config_dict
@@ -21,7 +21,7 @@ except KeyError:
     
 
 app = create_app(app_config) 
-Migrate(app, db)
+# Migrate(app, db)
 
 
 if __name__ == "__main__":
