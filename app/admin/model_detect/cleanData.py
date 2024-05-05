@@ -3,6 +3,8 @@ import re
 from pyvi import ViTokenizer, ViPosTagger
 import json
 import os
+basedir    = os.path.abspath(os.path.dirname(__file__))
+
 # global variable
 uniChars = "àáảãạâầấẩẫậăằắẳẵặèéẻẽẹêềếểễệđìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵÀÁẢÃẠÂẦẤẨẪẬĂẰẮẲẴẶÈÉẺẼẸÊỀẾỂỄỆĐÌÍỈĨỊÒÓỎÕỌÔỒỐỔỖỘƠỜỚỞỠỢÙÚỦŨỤƯỪỨỬỮỰỲÝỶỸỴÂĂĐÔƠƯ"
 unsignChars = "aaaaaaaaaaaaaaaaaeeeeeeeeeeediiiiiooooooooooooooooouuuuuuuuuuuyyyyyAAAAAAAAAAAAAAAAAEEEEEEEEEEEDIIIOOOOOOOOOOOOOOOOOOOUUUUUUUUUUUYYYYYAADOOU"
@@ -28,7 +30,7 @@ for i in range(len(bang_nguyen_am)):
 
 
 # Stopword
-stopwords_file_path = r'app\admin\model_detect\vietnamese-stopwords-dash.txt'
+stopwords_file_path = basedir + r'/vietnamese-stopwords-dash.txt'
 # Các hàm xử lý văn bản
 def remove_html(txt):
     return re.sub(r'<[^>]*>', '', txt)
@@ -271,6 +273,6 @@ if __name__ == '__main__':
     # process_files_neg(directory_path)
     file_path = "result.json"
     
-    preprocess_kiet(file_path, False)
+    # preprocess_kiet(file_path, False)
     
 

@@ -450,7 +450,6 @@ def crawl_rss(url , cate_id):
             "is_fake" : False
         }
         
-        print(f"{title} => {temp_url}")
                 
         new_data = crawl_content_rss(temp_data)
         
@@ -479,6 +478,7 @@ def crawl_content_rss(data):
                 pass
 
         content = article.text
+        title = article.title
         
         if(content == ""):
             content = re.sub('\\n+', '</p><p>', '<p>' + clean_json(content) + '</p>')
@@ -486,6 +486,7 @@ def crawl_content_rss(data):
         # tom tat van ban 
         content_sum = Summerizer(content,2)
         
+        data["title"] = title
         data["content"] = content
         data["summerize"] = content_sum
         # them bai bao moi vao csdl
