@@ -125,9 +125,9 @@ def start_crawl(url):
 
             # tom tat van ban 
             content_sum = Summerizer(content,2)
-
+            print(article.publish_date)
             # lay thoi gian dang bai
-            pub_date = todatetime(article.publish_date if article.publish_date else article.meta_data.get('pubdate', ''))
+            pub_date = todatetime(str(article.publish_date) if article.publish_date else str(article.meta_data.get('pubdate', '')))
             if(pub_date is None):
                 pub_date = extract_time(url)
                 if(pub_date is None):
